@@ -1,0 +1,37 @@
+<section class="section">
+    <div class="container">
+        <h1 class="title is-1">My Devices</h1>
+        
+        <div class="fixed-grid">
+            <div class="grid">
+                @if (loading) {
+                    @for (i of [1, 2]; track $index) {
+                        <app-device-summary-card [useSkeleton]="true"></app-device-summary-card>
+                    }
+                }
+
+                @for (device of $devices | async; track $index) {
+                    <div class="cell">
+                        <a [routerLink]="[device.id]">
+                            <app-device-summary-card [device]="device"></app-device-summary-card>
+                        </a>
+                    </div>
+                }
+
+            </div>
+        </div>
+        @if (errors.length) {
+            <app-message [type]="'danger'">
+                <article class="content">
+                    <p>An error occured:</p>
+                    <ul>
+                        @for (err of errors; track $index) {
+                            <li>{{err.message}}</li>
+                        }
+                    </ul>
+                    <a href="#" onclick="reload()">Click to refresh</a>
+                </article>
+            </app-message>
+        }
+    </div>
+</section>

@@ -1,0 +1,23 @@
+<section class="section">
+    <div class="container">
+        <h1 class="title is-1">Device Telemetry</h1>
+        <hr>
+        <h2 class="title is-3">Sensor readings</h2>
+        <div class="fixed-grid has-4-cols">
+            <div class="grid">
+                @for (dataset of chartDatasets$ | async; track $index) {
+                    <div class="cell">
+                        <div class="box">
+                            <app-telemetry-chart [data]="{datasets: [dataset]}" [type]="'scatter'" [options]="dataset.options"></app-telemetry-chart>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+<section class="section">
+    <div class="container" style="overflow-y: auto; max-height: 30rem;">
+        <pre>{{ (telemetryLogs$ | async) ?? "Nothing here yet..." | json }}</pre>
+    </div>
+</section>

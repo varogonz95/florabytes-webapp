@@ -1,0 +1,37 @@
+<article class="media box">
+    <figure class="media-left">
+        <p class="image is-64x64" [ngClass]="{'is-skeleton': useSkeleton}">
+            <img alt src="https://bulma.io/assets/images/placeholders/128x128.png" />
+        </p>
+    </figure>
+    <div class="media-content">
+        <div class="content">
+            @if (useSkeleton) {
+                <p>
+                    <span class="tag is-rounded is-skeleton">Connection State</span>
+                    <strong class="is-skeleton">Device name</strong>&nbsp;
+                    <br/>
+                    <span class="is-skeleton">Last Activity</span>&nbsp;
+                    <br/>
+                </p>
+                <div class="skeleton-lines">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            }
+            @else {
+                <p>
+                    <span class="tag is-rounded" [ngClass]="resolveConnectionStateTagClass(device.connectionState)">{{device.connectionState}}</span>&nbsp;
+                    <strong>{{device.id}}</strong>&nbsp;
+                    <br/>
+                    <small>{{device.lastActivityTime | date:'medium'}}</small>&nbsp;
+                    <br/>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ornare
+                    magna eros, eu pellentesque tortor vestibulum ut. Maecenas non massa
+                    sem. Etiam finibus odio quis feugiat facilisis.
+                </p>
+            }
+        </div>
+    </div>
+</article>
