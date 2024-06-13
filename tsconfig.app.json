@@ -1,23 +1,22 @@
 /* To learn more about this file see: https://angular.io/config/tsconfig. */
 {
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "outDir": "./out-tsc/app",
-    "types": [],
-    "paths": {
-        "os": [
-            "./node_modules/os-browserify/browser"
-        ],
-        "path": [
-            "./node_modules/path-browserify"
-        ]
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./out-tsc/app",
+        "paths": {
+            "os": [
+                "./node_modules/os-browserify/browser"
+            ],
+            "path": [
+                "./node_modules/path-browserify"
+            ]
+        },
     },
-  },
-  "files": [
-    "src/main.ts",
-    "./polyfills.ts"
-  ],
-  "include": [
-    "src/**/*.d.ts"
-  ]
+    "files": [
+        "./polyfills.ts",
+        "src/main.ts",
+    ],
+    "include": [
+        "src/**/*.d.ts"
+    ]
 }

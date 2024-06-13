@@ -4,6 +4,7 @@
     "compilerOptions": {
         "outDir": "./dist/out-tsc",
         "strict": true,
+        "noImplicitAny": false,
         "noImplicitOverride": true,
         "noPropertyAccessFromIndexSignature": true,
         "noImplicitReturns": true,
@@ -22,6 +23,15 @@
             "ES2022",
             "dom"
         ],
+        "typeRoots": [
+            "node_modules/@types"
+        ],
+        "types": [
+            "node",
+            "w3c-web-serial",
+            "w3c-web-hid",
+            "w3c-web-usb",
+        ]
     },
     "angularCompilerOptions": {
         "enableI18nLegacyMessageIdFormat": false,

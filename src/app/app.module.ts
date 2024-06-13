@@ -10,7 +10,6 @@ import { DeviceListPage } from './pages/device-list-page/device-list.component';
 import { DeviceTelemetryPage } from './pages/device-telemetry-page/device-telemetry-page.component';
 import { TelemetryChartComponent } from './components/telemetry-chart/telemetry-chart.component';
 import { MessageComponent } from './components/message/message.component';
-// import { TelemetryChartComponent } from './components/telemetry-chart/telemetry-chart.component';
 
 @NgModule({
   declarations: [

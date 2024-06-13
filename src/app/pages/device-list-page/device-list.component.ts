@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, catchError, finalize, throwError } from 'rxjs';
-import { DeviceSummary, PgotchiHttpClientService } from '../../services/pgotchi-httpclient/pgotchi-http-client.service';
+import { PgotchiHttpClientService } from '../../services/pgotchi-httpclient/pgotchi-http-client.service';
+import { DeviceSummary } from '../../models/device-summary';
 
 @Component({
     selector: 'app-device-list',
@@ -17,12 +18,16 @@ export class DeviceListPage implements OnInit {
     }
 
     ngOnInit(): void {
+        this.fetchDevices();
+    }
+
+    private fetchDevices() {
         this.$devices = this._pgotchiService
             .getDevices()
             .pipe(
                 catchError((error, caught) => {
                     this.errors.push(error);
-                    return throwError(() => error)
+                    return throwError(() => error);
                 }),
                 finalize(() => this.loading = false));
     }
@@ -32,6 +37,7 @@ export class DeviceListPage implements OnInit {
     }
 
     public reload() {
-        window.location.reload()
+        this.loading = true;
+        this.fetchDevices();
     }
 }

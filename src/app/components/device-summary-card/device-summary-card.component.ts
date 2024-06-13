@@ -1,5 +1,5 @@
-import { Component, Input, input } from '@angular/core';
-import { DeviceSummary } from '../../services/pgotchi-httpclient/pgotchi-http-client.service';
+import { Component, Input } from '@angular/core';
+import { DeviceSummary } from '../../models/device-summary';
 
 @Component({
     selector: 'app-device-summary-card',
@@ -18,6 +18,7 @@ export class DeviceSummaryCardComponent {
         eTag: "",
         lastActivityTime: "",
         status: "Unknown",
+        userId: "",
     }
 
     constructor() {
