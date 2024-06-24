@@ -1,6 +1,13 @@
 <section class="section">
     <div class="container">
-        <h1 class="title is-1">My Devices</h1>
+        <nav class="level">
+            <div class="level-left">
+                <h1 class="title is-1">My Devices</h1>
+            </div>
+            <div class="level-right">
+                <a routerLink="/add-device" class="button is-primary">Register device</a>
+            </div>
+        </nav>
         
         <div class="fixed-grid">
             <div class="grid">
@@ -12,13 +19,14 @@
 
                 @for (device of $devices | async; track $index) {
                     <div class="cell">
-                        <a [routerLink]="[device.id]">
+                        <a [routerLink]="['/devices', device.id]">
                             <app-device-summary-card [device]="device"></app-device-summary-card>
                         </a>
                     </div>
                 }
 
             </div>
+
         </div>
         @if (errors.length) {
             <app-message [type]="'danger'">
@@ -29,7 +37,7 @@
                             <li>{{err.message}}</li>
                         }
                     </ul>
-                    <a href="#" onclick="reload()">Click to refresh</a>
+                    <a class="button is-text" href="#" onclick="reload()">Click to refresh</a>
                 </article>
             </app-message>
         }

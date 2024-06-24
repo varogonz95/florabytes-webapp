@@ -1,8 +1,9 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { EventHubConsumerClient, Subscription as EventHubSubscription } from '@azure/event-hubs';
-import { Observable, Subject, interval, map, scan } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute } from "@angular/router";
+import * as signalR from "@microsoft/signalr";
+import { Observable, Subject, map, scan } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { DeviceSummary, PgotchiHttpClientService } from '../../services/pgotchi-httpclient/pgotchi-http-client.service';
+import { DeviceSummary } from "../../models/device-summary";
 
 const MAX_RECORDS = 30;
 
@@ -12,18 +13,20 @@ const MAX_RECORDS = 30;
     styleUrl: './device-telemetry-page.component.css',
 })
 export class DeviceTelemetryPage implements OnInit, OnDestroy {
-    @Input()
-    public id: string = "";
+    public deviceSummary!: DeviceSummary;
+    public telemetryLogs$!: Observable<SensorData[]>;
+    public chartDatasets$!: Observable<any>;
 
-    public device$ = new Observable<DeviceSummary>();
-    public telemetryLogs$ = new Observable<SensorData[]>();
-    public chartDatasets$: Observable<any>;
-
-    private telemetrySub$ = new Subject<SensorData>();
-    private readonly consumerClientSub$: EventHubSubscription;
+    private signalRHubConnection!: signalR.HubConnection
+    private readonly telemetrySub$ = new Subject<SensorData>();
 
     constructor(
-        private readonly _pgotchiService: PgotchiHttpClientService) {
+        private readonly _activatedRoute: ActivatedRoute) {
+    }
+
+    ngOnInit(): void {
+        const routeSnapshot = this._activatedRoute.snapshot;
+        this.deviceSummary = routeSnapshot.data['device'];
 
         this.telemetryLogs$ = this.telemetrySub$
             .pipe(
@@ -65,64 +68,31 @@ export class DeviceTelemetryPage implements OnInit, OnDestroy {
             );
 
         const { negotiateEndpoint } = environment.pgotchiSignalR;
-        // this.connection = new signalR.HubConnectionBuilder()
-        //     .withUrl(negotiateEndpoint)
-        //     .build();
 
-        // this.connection.on("message", (...args: any[]) => {
-        //     console.log("message received: ", args)
-        //     var data = this.mockSensorData()
-        //     this.telemetrySub$.next(data);
-        // });
+        this.signalRHubConnection = new signalR.HubConnectionBuilder()
+            .withUrl(negotiateEndpoint, {
+                headers: { 'x-user-id': this.deviceSummary.userId },
+                transport: signalR.HttpTransportType.WebSockets,
+            })
+            .build();
 
-        // this.emitTestData();
+        this.signalRHubConnection.on("newMessage", data => {
+            console.log(data);
+            data.$timestamp = new Date().getSeconds();
+            this.telemetrySub$.next(data);
+        })
 
-        const { consumerGroup, connectionString, eventHubName } = environment.pgotchiIotHub.eventHub;
-        const consumerClient = new EventHubConsumerClient(consumerGroup ?? "$Default", connectionString);
-        this.consumerClientSub$ = consumerClient.subscribe({
-            processEvents: async (events, context) => {
-                console.log("Received events:")
-                events.forEach(console.log);
-            },
-            processError: async (err, context) => {
-                console.log("Process error: ", err);
-            },
-            processInitialize: async (context) => {
-                console.log("Hello")
-            }
-        });
-    }
-
-    ngOnInit(): void {
-        // this.connection.start()
-        //     .then(() => console.log('Started connection to Device Telemetry Hub'))
-        //     .catch(err => console.error('Failed connecting to Device Telemetry Hub:', err));
-
-        this.device$ = this._pgotchiService
-            .getDeviceById(this.id);
-    }
-
-    private emitTestData(inter = true) {
-        if (inter)
-            interval(1000)
-                .subscribe(() =>
-                    this.telemetrySub$.next(this.mockSensorData()))
-        else
-            this.telemetrySub$.next(this.mockSensorData())
-    }
-
-    private mockSensorData(): SensorData {
-        return {
-            $timestamp: new Date().getSeconds(),
-            soilMoisture: Math.random() * 100,
-            lightLevel: Math.random() * 100,
-            humidity: Math.random() * 100,
-        }
+        this.signalRHubConnection
+            .start()
+            .then(() => console.log("SignalR connection started"))
+            .catch(err => console.error("SignalR connection failed.", err));
     }
 
     ngOnDestroy(): void {
-        // this.connection.stop()
-        this.consumerClientSub$.close()
+        this.signalRHubConnection
+            .stop()
+            .then(() => console.log("SignalR connection stopped"))
+
         this.telemetrySub$.unsubscribe();
     }
 }

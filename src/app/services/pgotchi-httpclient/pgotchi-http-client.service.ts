@@ -2,9 +2,10 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, map, throwError } from 'rxjs';
 import { environment as env } from '../../../environments/environment';
+import { DeviceSummary } from '../../models/device-summary';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class PgotchiHttpClientService {
     public readonly baseAddress;
@@ -34,13 +35,4 @@ export class PgotchiHttpClientService {
             map(response => response as DeviceSummary)
         );
     }
-}
-
-export interface DeviceSummary {
-    id: string
-    eTag: string
-    deviceETag: string
-    status: string
-    connectionState: string
-    lastActivityTime: string
 }

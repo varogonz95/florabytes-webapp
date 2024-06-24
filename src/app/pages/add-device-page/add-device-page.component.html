@@ -1,0 +1,26 @@
+<section class="section">
+    <div class="container">
+        <h1 class="title is-1">Register new Device</h1>
+        <hr>
+        <nav class="level">
+            <div class="level-item has-text-centered">
+                <button type="button" class="button" (click)="selectSerialPort()">Select Serial Port</button>
+            </div>
+            @if (selectedPort) 
+            {
+                <div class="level-item has-text-centered">
+                    <button type="button" class="button" (click)="sendData()">Send data</button>
+                </div>
+                <div class="level-item has-text-centered">
+                    <button type="button" class="button" (click)="forgetDevice()">Forget Device</button>
+                </div>
+            }
+        </nav>
+
+        <div class="fixed-grid">
+            <div class="grid">
+
+            </div>
+        </div>
+    </div>
+</section>
