@@ -13,7 +13,7 @@
         },
     },
     "files": [
-        "./polyfills.ts",
+        "src/polyfills.ts",
         "src/main.ts",
     ],
     "include": [

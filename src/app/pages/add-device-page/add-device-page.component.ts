@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { buffer } from 'rxjs';
 
 @Component({
     selector: 'app-add-device-page',
