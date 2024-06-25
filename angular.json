@@ -28,7 +28,8 @@
                         "browser": "src/main.ts",
                         "preserveSymlinks": true,
                         "polyfills": [
-                            "zone.js"
+                            "zone.js",
+                            "./src/polyfills.ts"
                         ],
                         "tsConfig": "tsconfig.app.json",
                         "assets": [
@@ -72,7 +73,6 @@
                     "defaultConfiguration": "production"
                 },
                 "serve": {
-                    "forceEsBuild": true,
                     "builder": "@angular-devkit/build-angular:dev-server",
                     "configurations": {
                         "production": {
@@ -110,11 +110,6 @@
                     }
                 }
             }
-        }
-    },
-    "cli": {
-        "cache": {
-            "enabled": false
         }
     }
 }
