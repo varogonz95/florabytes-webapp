@@ -70,7 +70,7 @@ export class DeviceSetupPage implements OnInit {
                                 console.log(`Could not connect to primary service. Retry ${retryCount} of ${maxRetries}...`);
                                 if (++retryCount >= maxRetries) {
                                     clearInterval(intervalId);
-                                    return reject(new Error("Could not get primary service.", err));
+                                    return reject(new Error("Could not get primary service."));
                                 }
                             });
                     }, 3000);
