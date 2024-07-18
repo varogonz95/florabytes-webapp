@@ -1,0 +1,63 @@
+<section class="section">
+    <div class="container">
+        <header class="block has-text-centered mb-6">
+            <h1 class="title is-1">Setup New Device</h1>
+            <h2 class="subtitle">Complete the steps below to setup your FloraBytes device 🌱</h2>
+        </header>
+
+        <div class="columns is-centered">
+            <div class="column is-half box">
+                @switch (step) {
+                    @case (SetupSteps.ScanDevices) {
+                        <article class="has-text-centered">
+                            <h5 class="subtitle">Step 1.</h5>
+                            <h3 class="title">Scan for new devices</h3>
+                            <button 
+                                class="button is-link" 
+                                [ngClass]="{'is-loading is-disabled': connectingDevice}"
+                                [disabled]="connectingDevice" 
+                                (click)="scanAndPairDevice()">
+                                Scan
+                            </button>
+                        </article>
+                    }
+                    @case (SetupSteps.NetworkSetup) {
+                        <form>
+                            <h5 class="subtitle">Step 2.</h5>
+                            <h3 class="title">Config your local network</h3>
+    
+                            <div class="field">
+                                <label for="" class="label">Network SSID</label>
+                                <div class="control">
+                                    <input type="text" class="input" name="ssid" [(ngModel)]="wifiInfo.Ssid"/>
+                                </div>
+                            </div>
+    
+                            <div class="field">
+                                <label for="" class="label">Password</label>
+                                <div class="control">
+                                    <input type="password" class="input" name="pwd" [(ngModel)]="wifiInfo.Password"/>
+                                </div>
+                            </div>
+    
+                            <div class="field">
+                                <div class="control">
+                                    <button type="button" class="button is-link" (click)="submitWifiCredentials()">Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                    }
+                    @case (SetupSteps.Completed) {
+                        <article class="has-text-centered">
+                            <h5 class="subtitle">Step 3.</h5>
+                            <h3 class="title">Device Setup Complete!</h3>
+                            <p>
+                                Now your device network is set up!
+                            </p>
+                        </article>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</section>

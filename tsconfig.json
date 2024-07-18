@@ -28,6 +28,7 @@
         ],
         "types": [
             "node",
+            "web-bluetooth",
             "w3c-web-serial",
             "w3c-web-hid",
             "w3c-web-usb",
