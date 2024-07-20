@@ -38,8 +38,7 @@
                         ],
                         "styles": [
                             "src/styles.css",
-                            "node_modules/bulma/css/bulma.min.css",
-                            "node_modules/bulma-o-steps/bulma-steps.min.css"
+                            "node_modules/bulma/css/bulma.min.css"
                         ],
                         "scripts": []
                     },

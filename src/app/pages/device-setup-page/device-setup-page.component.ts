@@ -2,8 +2,6 @@ import { Component, OnInit } from '@angular/core';
 
 const ServiceGuid = "0742a8ea-396a-4947-9962-f2fab085854a";
 const WriteCharacteristicGuid = "0742a8ea-396a-4947-9962-f2fab085854f";
-const ReconnectionTimeout = 1000;
-const MaxReconnectionTimeout = 60000;
 
 interface WifiInfo {
     Ssid: string
@@ -15,6 +13,7 @@ enum SetupSteps {
     ConnectDevice,
     NetworkSetup,
     Completed,
+    AdapterUnavailable,
 }
 
 @Component({
@@ -26,7 +25,8 @@ export class DeviceSetupPage implements OnInit {
     public deviceName = "";
     public connectingDevice = false;
     public error: Error = null!;
-    public step = SetupSteps.ScanDevices;
+    // public step = SetupSteps.ScanDevices;
+    public stepsSequence = [SetupSteps.ScanDevices];
     public SetupSteps = SetupSteps;
     public wifiInfo: WifiInfo;
 
@@ -37,11 +37,18 @@ export class DeviceSetupPage implements OnInit {
     }
 
     ngOnInit(): void {
+        navigator.bluetooth.getAvailability()
+            .then(isBluetoothAvailable => {
+                if (!isBluetoothAvailable) {
+                    this.stepsSequence = [SetupSteps.AdapterUnavailable];
+                }
+            })
+            .catch();
     }
 
     public async scanAndPairDevice() {
         this.connectingDevice = true;
-        
+
         navigator.bluetooth.requestDevice({
             acceptAllDevices: true,
             optionalServices: [ServiceGuid, WriteCharacteristicGuid]
@@ -54,7 +61,8 @@ export class DeviceSetupPage implements OnInit {
             .then(gattService => gattService.getCharacteristic(WriteCharacteristicGuid))
             .then(gattCharacteristic => this.gattCharacteristic = gattCharacteristic)
             .then(() => {
-                this.step = SetupSteps.NetworkSetup;
+                this.stepsSequence.unshift(SetupSteps.NetworkSetup);
+                this.error = null!;
             })
             .catch(reason => {
                 console.log(reason);
@@ -66,11 +74,17 @@ export class DeviceSetupPage implements OnInit {
     }
 
     public async submitWifiCredentials() {
-        if (!this.gattCharacteristic)
-            throw new Error("GATT Write Characteristic cannot be null.");
+        // if (!this.gattCharacteristic)
+        //     throw new Error("GATT Write Characteristic cannot be null.");
 
-        const wifiCredentials = JSON.stringify(this.wifiInfo);
-        const buffer = Buffer.from(wifiCredentials);
-        await this.gattCharacteristic.writeValueWithoutResponse(buffer);
+        // const wifiCredentials = JSON.stringify(this.wifiInfo);
+        // const buffer = Buffer.from(wifiCredentials);
+        // await this.gattCharacteristic.writeValueWithoutResponse(buffer);
+
+        this.stepsSequence.unshift(SetupSteps.Completed);
+    }
+
+    public goBack() {
+        this.stepsSequence.shift();
     }
 }
