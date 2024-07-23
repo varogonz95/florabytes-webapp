@@ -90,8 +90,8 @@ export class DeviceSetupPage implements OnInit {
     }
 
     public async submitWifiCredentials() {
-        // if (!this.gattCharacteristic)
-        //     throw new Error("GATT Write Characteristic cannot be null.");
+        if (!this.gattCharacteristic)
+            throw new Error("GATT Write Characteristic cannot be null.");
 
         const wifiCredentials = JSON.stringify(this.deviceInfo);
         const buffer = Buffer.from(wifiCredentials);
