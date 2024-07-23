@@ -8,7 +8,7 @@
         <div class="columns is-centered is-multiline">
             <div class="column is-half">
                 <article class="card">
-                    @if (stepsSequence.length > 1) {
+                    @if (stepsSequence.length > 1 && stepsSequence[0] !== SetupSteps.Completed) {
                         <header class="card-header">
                             <button class="card-header-icon" type="button" aria-label="more options" (click)="goBack()">
                                 <span class="icon">
@@ -36,21 +36,20 @@
                                     <div class="field">
                                         <label for="" class="label">Network SSID</label>
                                         <div class="control">
-                                            <input type="text" class="input" name="ssid" [(ngModel)]="wifiInfo.Ssid" />
+                                            <input type="text" class="input" name="ssid" [(ngModel)]="deviceInfo.Ssid" />
                                         </div>
                                     </div>
             
                                     <div class="field">
                                         <label for="" class="label">Password</label>
                                         <div class="control">
-                                            <input type="password" class="input" name="pwd" [(ngModel)]="wifiInfo.Password" />
+                                            <input type="password" class="input" name="pwd" [(ngModel)]="deviceInfo.Password" />
                                         </div>
                                     </div>
             
                                     <div class="field">
                                         <div class="control">
-                                            <button type="button" class="button is-link"
-                                                (click)="submitWifiCredentials()">Connect</button>
+                                            <button type="button" class="button is-link" (click)="submitWifiCredentials()">Connect</button>
                                         </div>
                                     </div>
                                 </form>
@@ -63,7 +62,7 @@
                                         Now your device network is set up!
                                     </p>
                                 </div>
-                                <a routerLink="/device-telemetry-page" class="button is-link">Go to Device Telemetry</a>
+                                <a [routerLink]="['devices', 'deviceName', 'telemetry']" class="button is-link">Go to Device Telemetry</a>
                             }
                             @case (SetupSteps.AdapterUnavailable) {
                                 <h3 class="title">Woops! :(</h3>

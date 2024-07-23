@@ -19,7 +19,7 @@
 
                 @for (device of $devices | async; track $index) {
                     <div class="cell">
-                        <a [routerLink]="['/devices', device.id]">
+                        <a [routerLink]="['devices', device.id, 'telemetry']">
                             <app-device-summary-card [device]="device"></app-device-summary-card>
                         </a>
                     </div>

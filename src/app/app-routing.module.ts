@@ -17,7 +17,7 @@ const routes: Routes = [
             { path: '', pathMatch: 'full', component: DeviceListPage },
             { path: 'setup', pathMatch: 'full', component: DeviceSetupPage },
             {
-                path: ':deviceId',
+                path: ':deviceId/telemetry',
                 component: DeviceTelemetryPage,
                 resolve: { device: deviceResolver, }
             },
