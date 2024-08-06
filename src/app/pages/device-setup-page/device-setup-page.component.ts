@@ -1,20 +1,24 @@
 import { Component, OnInit } from '@angular/core';
 
-const ServiceGuid = "0742a8ea-396a-4947-9962-f2fab085854a";
+const MaxRetries = 10;
+const ServiceGuid = /* "0742a8ea-396a-4947-9962-f2fab085854a" */ 'hid_service';
 const WriteCharacteristicGuid = "0742a8ea-396a-4947-9962-f2fab085854f";
-
-interface DeviceInfo {
-    DeviceName: string;
-    Ssid: string
-    Password?: string
-}
 
 enum SetupSteps {
     ScanDevices,
     ConnectDevice,
     NetworkSetup,
+    EditDeviceInfo,
     Completed,
     AdapterUnavailable,
+}
+
+export interface DeviceInfo {
+    DeviceId: string;
+    DeviceName: string;
+    DeviceDescription?: string;
+    Ssid: string
+    Password?: string
 }
 
 @Component({
@@ -23,8 +27,8 @@ enum SetupSteps {
     styleUrl: './device-setup-page.component.css',
 })
 export class DeviceSetupPage implements OnInit {
+
     public connectingDevice = false;
-    // public step = SetupSteps.ScanDevices;
     public stepsSequence = [SetupSteps.ScanDevices];
     public SetupSteps = SetupSteps;
     public deviceInfo: DeviceInfo;
@@ -32,7 +36,11 @@ export class DeviceSetupPage implements OnInit {
     private gattCharacteristic: BluetoothRemoteGATTCharacteristic = null!;
 
     constructor() {
-        this.deviceInfo = { DeviceName: '', Ssid: '' };
+        this.deviceInfo = { 
+            DeviceId: '', 
+            DeviceName: '',
+            Ssid: '' 
+        };
     }
 
     ngOnInit(): void {
@@ -45,48 +53,62 @@ export class DeviceSetupPage implements OnInit {
             .catch();
     }
 
-    public scanAndPairDevice() {
+    public async scanAndPairDevice() {
         this.connectingDevice = true;
+        try {
+            const device = await this.selectDevice();
+            this.deviceInfo.DeviceId = device.id;
+            this.deviceInfo.DeviceName = device.name ?? device.id;
 
-        navigator.bluetooth.requestDevice({
+            const gattService = await this.connectToGattService(device);
+            this.gattCharacteristic = await gattService.getCharacteristic(WriteCharacteristicGuid);
+            this.stepsSequence.unshift(SetupSteps.NetworkSetup);
+        }
+        catch (reason) {
+            console.log(reason);
+        }
+        finally {
+            this.connectingDevice = false;
+        }
+    }
+
+    private async selectDevice() {
+        return await navigator.bluetooth.requestDevice({
             acceptAllDevices: true,
-            optionalServices: [ServiceGuid, WriteCharacteristicGuid]
-        })
-            .then(device => {
-                this.deviceInfo.DeviceName = device.name ?? device.id
-                return device.gatt?.connect() ?? Promise.reject(new Error("GATT Server not available."))
-            })
-            .then(gattServer => {
-                return new Promise((resolve, reject) => {
-                    const maxRetries = 10;
-                    let retryCount = 0;
-                    const intervalId = setInterval(async () => {
-                        gattServer.getPrimaryService(ServiceGuid)
-                            .then(x => {
-                                clearInterval(intervalId);
-                                return resolve(x);
-                            })
-                            .catch(err => {
-                                console.log(`Could not connect to primary service. Retry ${retryCount} of ${maxRetries}...`);
-                                if (++retryCount >= maxRetries) {
-                                    clearInterval(intervalId);
-                                    return reject(new Error("Could not get primary service."));
-                                }
-                            });
-                    }, 3000);
-                }) as Promise<BluetoothRemoteGATTService>
-            })
-            .then(gattService => gattService.getCharacteristic(WriteCharacteristicGuid))
-            .then(gattCharacteristic => this.gattCharacteristic = gattCharacteristic)
-            .then(() => {
-                this.stepsSequence.unshift(SetupSteps.NetworkSetup);
-            })
-            .catch(reason => {
-                console.log(reason);
-            })
-            .finally(() => {
-                this.connectingDevice = false;
-            });
+            optionalServices: [ServiceGuid, WriteCharacteristicGuid],
+        });
+    }
+
+    private async connectToGattService(device: BluetoothDevice): Promise<BluetoothRemoteGATTService> {
+        if (!device?.gatt) {
+            throw new Error("GATT not available.");
+        }
+
+        let retryCount = 0;
+        let gattService: BluetoothRemoteGATTService = null!;
+        let gattServer: BluetoothRemoteGATTServer = null!;
+
+        while (retryCount < MaxRetries) {
+            try {
+                gattServer = await device.gatt.connect();
+                gattService = await gattServer.getPrimaryService(ServiceGuid);
+                break;
+            }
+            catch (err) {
+                retryCount++;
+                console.log(`Could not connect to primary service. Retry ${retryCount} of ${MaxRetries}...`);
+            }
+        }
+
+        if (!gattServer?.connected) {
+            throw new Error("Could not connect to GATT Server.");
+        }
+
+        if (!gattService) {
+            throw new Error(`Could not get primary service {${ServiceGuid}}.`);
+        }
+
+        return gattService;
     }
 
     public async submitWifiCredentials() {
@@ -97,9 +119,11 @@ export class DeviceSetupPage implements OnInit {
         const buffer = Buffer.from(wifiCredentials);
         await this.gattCharacteristic.writeValueWithoutResponse(buffer);
 
-        this.stepsSequence.unshift(SetupSteps.Completed);
+        this.stepsSequence.unshift(SetupSteps.EditDeviceInfo);
+    }
 
-        console.log(this.stepsSequence);
+    public async editDeviceInfo() {
+
     }
 
     public goBack() {

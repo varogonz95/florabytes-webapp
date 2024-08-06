@@ -7,6 +7,7 @@
     "angular.ng-template"
   ];
   idx.previews = {
+    enable = false;
     previews = {
       web = {
         command = [

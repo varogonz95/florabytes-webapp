@@ -9,7 +9,7 @@
             <div class="column is-half">
                 <article class="card">
                     @if (stepsSequence.length > 1 && stepsSequence[0] !== SetupSteps.Completed) {
-                        <header class="card-header">
+                        <header class="card-header is-shadowless">
                             <button class="card-header-icon" type="button" aria-label="more options" (click)="goBack()">
                                 <span class="icon">
                                     <i class="fas fa-angle-down" aria-hidden="true"></i>
@@ -21,38 +21,23 @@
                     <div class="card-content">
                         @switch (stepsSequence[0]) {
                             @case (SetupSteps.ScanDevices) {
-                                <h5 class="subtitle">Step 1.</h5>
-                                <h3 class="title">Scan for new devices</h3>
-                                <button class="button is-link" [ngClass]="{'is-loading is-disabled': connectingDevice}"
-                                    [disabled]="connectingDevice" (click)="scanAndPairDevice()">
-                                    Scan
-                                </button>
+                                <app-scan-devices-step 
+                                    (requestScan)="scanAndPairDevice()"
+                                    [isConnecting]="connectingDevice">
+                                </app-scan-devices-step>
                             }
                             @case (SetupSteps.NetworkSetup) {
-                                <form>
-                                    <h5 class="subtitle">Step 2.</h5>
-                                    <h3 class="title">Config your local network</h3>
-            
-                                    <div class="field">
-                                        <label for="" class="label">Network SSID</label>
-                                        <div class="control">
-                                            <input type="text" class="input" name="ssid" [(ngModel)]="deviceInfo.Ssid" />
-                                        </div>
-                                    </div>
-            
-                                    <div class="field">
-                                        <label for="" class="label">Password</label>
-                                        <div class="control">
-                                            <input type="password" class="input" name="pwd" [(ngModel)]="deviceInfo.Password" />
-                                        </div>
-                                    </div>
-            
-                                    <div class="field">
-                                        <div class="control">
-                                            <button type="button" class="button is-link" (click)="submitWifiCredentials()">Connect</button>
-                                        </div>
-                                    </div>
-                                </form>
+                                <app-network-setup-step 
+                                    [model]="deviceInfo"
+                                    (submit)="submitWifiCredentials()">
+                                </app-network-setup-step>
+                            }
+                            @case (SetupSteps.EditDeviceInfo) {
+                                <app-edit-device-info-step
+                                    [step]="stepsSequence[0]" 
+                                    [model]="deviceInfo" 
+                                    (submit)="editDeviceInfo()">
+                                </app-edit-device-info-step>
                             }
                             @case (SetupSteps.Completed) {
                                 <h5 class="subtitle">Step 3.</h5>
@@ -62,7 +47,7 @@
                                         Now your device network is set up!
                                     </p>
                                 </div>
-                                <a [routerLink]="['devices', 'deviceName', 'telemetry']" class="button is-link">Go to Device Telemetry</a>
+                                <a [routerLink]="['devices', deviceInfo.DeviceId]" class="button is-link">Go to Device Telemetry</a>
                             }
                             @case (SetupSteps.AdapterUnavailable) {
                                 <h3 class="title">Woops! :(</h3>

@@ -10,7 +10,8 @@ import { MessageComponent } from './components/message/message.component';
 import { NavHeaderComponent } from './components/nav-header/nav-header.component';
 import { TelemetryChartComponent } from './components/telemetry-chart/telemetry-chart.component';
 import { DeviceListPage } from './pages/device-list-page/device-list.component';
-import { DeviceSetupPage } from './pages/device-setup-page/device-setup-page.component';
+// import { DeviceSetupPage } from './pages/device-setup-page/device-setup-page.component';
+import { DeviceSetupPageModule } from './pages/device-setup-page/device-setup-page.module';
 import { DeviceTelemetryPage } from './pages/device-telemetry-page/device-telemetry-page.component';
 
 @NgModule({
@@ -22,13 +23,14 @@ import { DeviceTelemetryPage } from './pages/device-telemetry-page/device-teleme
         
         DeviceListPage,
         DeviceTelemetryPage,
-        DeviceSetupPage,
+        // DeviceSetupPage,
     ],
     imports: [
         BrowserModule,
         AppRoutingModule,
         FormsModule,
         TelemetryChartComponent,
+        DeviceSetupPageModule,
     ],
     providers: [
         provideCharts(withDefaultRegisterables()),

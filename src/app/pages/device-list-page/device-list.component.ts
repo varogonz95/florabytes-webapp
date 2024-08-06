@@ -25,7 +25,7 @@ export class DeviceListPage implements OnInit {
         this.$devices = this._pgotchiService
             .getDevices()
             .pipe(
-                catchError((error, caught) => {
+                catchError((error, _caught) => {
                     this.errors.push(error);
                     return throwError(() => error);
                 }),

@@ -1,0 +1,6 @@
+<h5 class="subtitle">Step 1.</h5>
+<h3 class="title">Scan for new devices</h3>
+<button class="button is-link" [ngClass]="{'is-loading is-disabled': isConnecting}" [disabled]="isConnecting"
+    (click)="requestScanHandler()">
+    Scan
+</button>
