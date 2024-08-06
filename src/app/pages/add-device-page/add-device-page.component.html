@@ -6,6 +6,9 @@
             <div class="level-item has-text-centered">
                 <button type="button" class="button" (click)="selectSerialPort()">Select Serial Port</button>
             </div>
+            <div class="level-item has-text-centered">
+                <button type="button" class="button" (click)="scanBluetooth()">Select Bluetooth</button>
+            </div>
             @if (selectedPort) 
             {
                 <div class="level-item has-text-centered">

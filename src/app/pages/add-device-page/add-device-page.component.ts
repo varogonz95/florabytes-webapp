@@ -1,5 +1,9 @@
 import { Component } from '@angular/core';
 
+const BTServiceGUUID = "0742a8ea-396a-4947-9962-f2fab085854a";
+const BTReadStaticCharUUID = "0742a8ea-396a-4947-9962-f2fab085854f";
+const MaxRetries = 10;
+
 @Component({
     selector: 'app-add-device-page',
     templateUrl: './add-device-page.component.html',
@@ -38,6 +42,67 @@ export class AddDevicePage {
         }
         catch (error) {
             console.error('Error:', error)
+        }
+    }
+
+    public async scanBluetooth() {
+        const btAvailable = await navigator.bluetooth.getAvailability();
+
+        if (!btAvailable) {
+            alert("Bluetooth is not available");
+            return;
+        }
+
+        let btDevice: BluetoothDevice = null!;
+
+        try {
+            btDevice = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                // filters: [{ services: [BTServiceGUUID] }],
+                optionalServices: [BTServiceGUUID, BTReadStaticCharUUID]
+            });
+            console.log(btDevice);
+
+            if (!btDevice.gatt) {
+                throw Error("GATT Server is null");
+            }
+
+            console.log("Connecting...");
+            const gatt = await btDevice.gatt.connect();
+            console.log("Connected.")
+
+            console.log("Getting primary service:", BTServiceGUUID);
+
+            let service: BluetoothRemoteGATTService = null!;
+            let retries = 0;
+            while (++retries <= MaxRetries && service === null) {
+                try {
+                    service = await gatt.getPrimaryService(BTServiceGUUID);
+                    console.log("Primary service: ", service);
+                }
+                catch (error) {
+                    console.error(error);
+                    console.log("Retrying service retrieval...");
+                    await gatt.connect();
+                    continue;
+                }
+            }
+
+            if (!service) throw Error("Could not get GATT Primary Service")
+
+            const characteristic = await service.getCharacteristic(BTReadStaticCharUUID);
+            console.log(characteristic);
+
+            console.log("Sending Wifi credentials to device");
+            const ssid = prompt("Wifi SSID");
+            const pwd = prompt("Wifi Password");
+            const wifiCreds = JSON.stringify({ ssid, pwd });
+            const buffer = Buffer.from(wifiCreds, 'utf8');
+            console.log("Buffer length:", buffer.length);
+            await characteristic.writeValueWithoutResponse(buffer);
+        }
+        catch (error) {
+            console.log(error);
         }
     }
 

@@ -1,5 +1,6 @@
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { AppRoutingModule } from './app-routing.module';
@@ -9,6 +10,7 @@ import { MessageComponent } from './components/message/message.component';
 import { NavHeaderComponent } from './components/nav-header/nav-header.component';
 import { TelemetryChartComponent } from './components/telemetry-chart/telemetry-chart.component';
 import { DeviceListPage } from './pages/device-list-page/device-list.component';
+import { DeviceSetupPage } from './pages/device-setup-page/device-setup-page.component';
 import { DeviceTelemetryPage } from './pages/device-telemetry-page/device-telemetry-page.component';
 
 @NgModule({
@@ -17,13 +19,16 @@ import { DeviceTelemetryPage } from './pages/device-telemetry-page/device-teleme
         NavHeaderComponent,
         DeviceSummaryCardComponent,
         MessageComponent,
+        
         DeviceListPage,
         DeviceTelemetryPage,
+        DeviceSetupPage,
     ],
     imports: [
         BrowserModule,
         AppRoutingModule,
-        TelemetryChartComponent
+        FormsModule,
+        TelemetryChartComponent,
     ],
     providers: [
         provideCharts(withDefaultRegisterables()),

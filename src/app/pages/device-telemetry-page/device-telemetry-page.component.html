@@ -16,6 +16,7 @@
         </div>
     </div>
 </section>
+
 <section class="section">
     <div class="container" style="overflow-y: auto; max-height: 30rem;">
         <pre>{{ (telemetryLogs$ | async) ?? "Nothing here yet..." | json }}</pre>

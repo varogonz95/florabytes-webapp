@@ -5,7 +5,7 @@
                 <h1 class="title is-1">My Devices</h1>
             </div>
             <div class="level-right">
-                <a routerLink="/add-device" class="button is-primary">Register device</a>
+                <a routerLink="setup" class="button is-text">Setup New Device</a>
             </div>
         </nav>
         
@@ -19,7 +19,7 @@
 
                 @for (device of $devices | async; track $index) {
                     <div class="cell">
-                        <a [routerLink]="['/devices', device.id]">
+                        <a [routerLink]="['devices', device.id, 'telemetry']">
                             <app-device-summary-card [device]="device"></app-device-summary-card>
                         </a>
                     </div>

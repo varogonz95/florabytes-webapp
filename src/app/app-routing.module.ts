@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes, provideRouter, withComponentInputBinding } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 import { DeviceListPage } from './pages/device-list-page/device-list.component';
+import { DeviceSetupPage } from './pages/device-setup-page/device-setup-page.component';
 import { DeviceTelemetryPage } from './pages/device-telemetry-page/device-telemetry-page.component';
 import { deviceResolver } from './resolvers/device.resolver';
-import { AddDevicePage } from './pages/add-device-page/add-device-page.component';
 
 export const routeParams = {
     deviceId: 'deviceId',
@@ -11,15 +11,18 @@ export const routeParams = {
 
 const routes: Routes = [
     { path: '', redirectTo: '/devices', pathMatch: 'full' },
-    { path: 'devices', component: DeviceListPage },
     {
-        path: 'devices/:deviceId',
-        component: DeviceTelemetryPage,
-        resolve: {
-            device: deviceResolver,
-        }
+        path: 'devices',
+        children: [
+            { path: '', pathMatch: 'full', component: DeviceListPage },
+            { path: 'setup', pathMatch: 'full', component: DeviceSetupPage },
+            {
+                path: ':deviceId/telemetry',
+                component: DeviceTelemetryPage,
+                resolve: { device: deviceResolver, }
+            },
+        ]
     },
-    { path: 'add-device', component: AddDevicePage },
     //{ path: '**', component: PageNotFoundComponent },  // Wildcard route for a 404 page
 ];
 
@@ -27,7 +30,7 @@ const routes: Routes = [
     imports: [RouterModule.forRoot(routes)],
     exports: [RouterModule],
     providers: [
-        provideRouter(routes, withComponentInputBinding()),
+        // provideRouter(routes, withComponentInputBinding()),
     ]
 })
 export class AppRoutingModule { }
