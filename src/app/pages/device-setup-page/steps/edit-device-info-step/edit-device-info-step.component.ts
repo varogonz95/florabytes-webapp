@@ -13,6 +13,8 @@ export class EditDeviceInfoStepComponent {
     @Output() public modelChange = new EventEmitter<DeviceInfo>();
     @Output() public submit = new EventEmitter();
 
+    public newDeviceLocation?: string;
+
     public submitHandler() {
         this.submit.emit();
     }

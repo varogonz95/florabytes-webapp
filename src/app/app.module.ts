@@ -20,7 +20,7 @@ import { DeviceTelemetryPage } from './pages/device-telemetry-page/device-teleme
         NavHeaderComponent,
         DeviceSummaryCardComponent,
         MessageComponent,
-        
+
         DeviceListPage,
         DeviceTelemetryPage,
         // DeviceSetupPage,
@@ -34,7 +34,7 @@ import { DeviceTelemetryPage } from './pages/device-telemetry-page/device-teleme
     ],
     providers: [
         provideCharts(withDefaultRegisterables()),
-        provideHttpClient(withInterceptorsFromDi())
+        provideHttpClient(withInterceptorsFromDi()),
     ],
     bootstrap: [AppComponent],
 })

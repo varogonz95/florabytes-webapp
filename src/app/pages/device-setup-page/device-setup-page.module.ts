@@ -6,6 +6,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NetworkSetupStepComponent } from './steps/network-setup-step/network-setup-step.component';
 import { EditDeviceInfoStepComponent } from './steps/edit-device-info-step/edit-device-info-step.component';
+import { provideAppEnvironment } from '../../../core/providers/app-environment.provider';
+import { CompletedStepComponent } from './steps/completed-step/completed-step.component';
 
 @NgModule({
     declarations: [
@@ -13,11 +15,15 @@ import { EditDeviceInfoStepComponent } from './steps/edit-device-info-step/edit-
         ScanDevicesStepComponent,
         NetworkSetupStepComponent,
         EditDeviceInfoStepComponent,
+        CompletedStepComponent,
     ],
     imports: [
         CommonModule,
         FormsModule,
         RouterModule,
+    ],
+    providers: [
+        provideAppEnvironment(),
     ],
     exports: [
         DeviceSetupPage,
