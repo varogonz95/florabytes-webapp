@@ -11,11 +11,11 @@ export const DefaultChartOptions = {
 @Component({
     standalone: true,
     selector: 'app-telemetry-chart',
-    templateUrl: './telemetry-chart.component.html',
-    styleUrl: './telemetry-chart.component.css',
+    templateUrl: './telemetry-chart-standalone.component.html',
+    styleUrl: './telemetry-chart-standalone.component.css',
     imports: [BaseChartDirective]
 })
-export class TelemetryChartComponent {
+export class TelemetryChartStandaloneComponent {
     @Input() public data: any;
     @Input() public datasets: any;
     @Input() public options: any = {};

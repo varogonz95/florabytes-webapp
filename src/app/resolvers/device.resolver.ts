@@ -4,7 +4,7 @@ import { routeParams } from '../app-routing.module';
 import { inject } from '@angular/core';
 import { PgotchiHttpClientService } from '../services/pgotchi-httpclient/pgotchi-http-client.service';
 
-export const deviceResolver: ResolveFn<DeviceSummary> = (route, state) => {
+export const deviceResolver: ResolveFn<DeviceSummary> = (route, _state) => {
     const deviceId = route.paramMap.get(routeParams.deviceId)!;
     const pgotchiHttpClient = inject(PgotchiHttpClientService);
     return pgotchiHttpClient.getDeviceById(deviceId)

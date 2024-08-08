@@ -1,20 +1,31 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
+import { APP_ENVIRONMENT } from '../../../core/providers/app-environment.provider';
+import { IAppEnvironment } from '../../../environments/app-environment';
+import { PgotchiHttpClientService, RegisterDeviceRequest } from '../../services/pgotchi-httpclient/pgotchi-http-client.service';
 
-const ServiceGuid = "0742a8ea-396a-4947-9962-f2fab085854a";
-const WriteCharacteristicGuid = "0742a8ea-396a-4947-9962-f2fab085854f";
-
-interface DeviceInfo {
-    DeviceName: string;
-    Ssid: string
-    Password?: string
-}
+const MaxRetries = 10;
+// Service and Characteristic UUIDs aliases can be found here:
+// https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/modules/bluetooth/bluetooth_uuid.cc
+const ServiceGuid = /* "0742a8ea-396a-4947-9962-f2fab085854a" */ 'user_data';
+const WriteCharacteristicGuid = /* "0742a8ea-396a-4947-9962-f2fab085854f" */ 'user_control_point';
 
 enum SetupSteps {
     ScanDevices,
     ConnectDevice,
     NetworkSetup,
+    EditDeviceInfo,
     Completed,
-    AdapterUnavailable,
+    Error,
+}
+
+export interface DeviceInfo {
+    DeviceId: string;
+    DeviceName: string;
+    DeviceDescription?: string;
+    DeviceLocation?: string;
+    AvatarImgUrl?: string;
+    Ssid: string
+    Password?: string
 }
 
 @Component({
@@ -24,69 +35,96 @@ enum SetupSteps {
 })
 export class DeviceSetupPage implements OnInit {
     public connectingDevice = false;
-    // public step = SetupSteps.ScanDevices;
-    public stepsSequence = [SetupSteps.ScanDevices];
+    public stepsSequence = [SetupSteps.EditDeviceInfo];
     public SetupSteps = SetupSteps;
     public deviceInfo: DeviceInfo;
 
     private gattCharacteristic: BluetoothRemoteGATTCharacteristic = null!;
 
-    constructor() {
-        this.deviceInfo = { DeviceName: '', Ssid: '' };
+    constructor(
+        @Inject(APP_ENVIRONMENT)
+        private readonly env: IAppEnvironment,
+        private readonly pgotchiHttpClient: PgotchiHttpClientService) {
+        this.deviceInfo = {
+            DeviceId: '',
+            DeviceName: '',
+            DeviceLocation: '',
+            Ssid: ''
+        };
     }
 
     ngOnInit(): void {
-        navigator.bluetooth.getAvailability()
-            .then(isBluetoothAvailable => {
-                if (!isBluetoothAvailable) {
-                    this.stepsSequence = [SetupSteps.AdapterUnavailable];
-                }
-            })
-            .catch();
+        if (!this.env.bypassBluetoothAdapterCheck)
+            navigator.bluetooth.getAvailability()
+                .then(isBluetoothAvailable => {
+                    if (!isBluetoothAvailable) {
+                        this.stepsSequence = [SetupSteps.Error];
+                    }
+                })
+                .catch();
     }
 
-    public scanAndPairDevice() {
+    public async scanAndPairDevice() {
         this.connectingDevice = true;
+        try {
+            const device = await this.selectDevice();
+            this.deviceInfo.DeviceId = device.id;
+            this.deviceInfo.DeviceName = device.name ?? device.id;
 
-        navigator.bluetooth.requestDevice({
-            acceptAllDevices: true,
-            optionalServices: [ServiceGuid, WriteCharacteristicGuid]
-        })
-            .then(device => {
-                this.deviceInfo.DeviceName = device.name ?? device.id
-                return device.gatt?.connect() ?? Promise.reject(new Error("GATT Server not available."))
-            })
-            .then(gattServer => {
-                return new Promise((resolve, reject) => {
-                    const maxRetries = 10;
-                    let retryCount = 0;
-                    const intervalId = setInterval(async () => {
-                        gattServer.getPrimaryService(ServiceGuid)
-                            .then(x => {
-                                clearInterval(intervalId);
-                                return resolve(x);
-                            })
-                            .catch(err => {
-                                console.log(`Could not connect to primary service. Retry ${retryCount} of ${maxRetries}...`);
-                                if (++retryCount >= maxRetries) {
-                                    clearInterval(intervalId);
-                                    return reject(new Error("Could not get primary service.", err));
-                                }
-                            });
-                    }, 3000);
-                }) as Promise<BluetoothRemoteGATTService>
-            })
-            .then(gattService => gattService.getCharacteristic(WriteCharacteristicGuid))
-            .then(gattCharacteristic => this.gattCharacteristic = gattCharacteristic)
-            .then(() => {
-                this.stepsSequence.unshift(SetupSteps.NetworkSetup);
-            })
-            .catch(reason => {
-                console.log(reason);
-            })
-            .finally(() => {
-                this.connectingDevice = false;
-            });
+            const gattService = await this.connectToGattService(device);
+            this.gattCharacteristic = await gattService.getCharacteristic(WriteCharacteristicGuid);
+            this.stepsSequence.unshift(SetupSteps.NetworkSetup);
+        }
+        catch (reason) {
+            console.log(reason);
+        }
+        finally {
+            this.connectingDevice = false;
+        }
+    }
+
+    private async selectDevice() {
+        return await navigator.bluetooth.requestDevice({
+            // acceptAllDevices: true,
+            // optionalServices: [ServiceGuid],
+            filters: [{ services: [ServiceGuid] }]
+        });
+    }
+
+    private async connectToGattService(device: BluetoothDevice): Promise<BluetoothRemoteGATTService> {
+        if (!device?.gatt)
+            throw new Error("GATT not available.");
+
+        let retryCount = 0;
+        let gattService: BluetoothRemoteGATTService = null!;
+        let gattServer: BluetoothRemoteGATTServer = null!;
+
+        const intervalId = setInterval(async () => {
+            if (retryCount < MaxRetries) {
+                try {
+                    gattServer = await device.gatt!.connect();
+                    gattService = await gattServer.getPrimaryService(ServiceGuid);
+                }
+                catch (err) {
+                    retryCount++;
+                    console.log(`Could not connect to primary service. Retry ${retryCount} of ${MaxRetries}...`);
+                }
+            }
+            else {
+                clearInterval(intervalId);
+                throw new Error("Could not connect to GATT Server.");
+            }
+        }, 1000);
+
+        if (!gattServer?.connected) {
+            throw new Error("Could not connect to GATT Server.");
+        }
+
+        if (!gattService) {
+            throw new Error(`Could not get primary service {${ServiceGuid}}.`);
+        }
+
+        return gattService;
     }
 
     public async submitWifiCredentials() {
@@ -95,11 +133,25 @@ export class DeviceSetupPage implements OnInit {
 
         const wifiCredentials = JSON.stringify(this.deviceInfo);
         const buffer = Buffer.from(wifiCredentials);
-        await this.gattCharacteristic.writeValueWithoutResponse(buffer);
 
-        this.stepsSequence.unshift(SetupSteps.Completed);
+        await this.gattCharacteristic.writeValueWithResponse(buffer);
 
-        console.log(this.stepsSequence);
+        this.gattCharacteristic.service.device.gatt?.disconnect();
+        this.stepsSequence.unshift(SetupSteps.EditDeviceInfo);
+    }
+
+    public async submitDeviceInfo() {
+        const request: RegisterDeviceRequest = {
+            deviceId: this.deviceInfo.DeviceId,
+            properties: {
+                "deviceName": this.deviceInfo.DeviceName,
+                "deviceDescription": this.deviceInfo.DeviceDescription,
+                "deviceLocation": this.deviceInfo.DeviceLocation,
+                "avatarImgUrl": this.deviceInfo.AvatarImgUrl,
+            }
+        }
+        const summary = await this.pgotchiHttpClient.registerDevice(request)
+        console.log(summary);
     }
 
     public goBack() {

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TelemetryChartComponent } from './telemetry-chart.component';
+import { TelemetryChartStandaloneComponent } from './telemetry-chart-standalone.component';
 
 describe('TelemetryChartComponent', () => {
-  let component: TelemetryChartComponent;
-  let fixture: ComponentFixture<TelemetryChartComponent>;
+  let component: TelemetryChartStandaloneComponent;
+  let fixture: ComponentFixture<TelemetryChartStandaloneComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TelemetryChartComponent]
+      declarations: [TelemetryChartStandaloneComponent]
     })
     .compileComponents();
     
-    fixture = TestBed.createComponent(TelemetryChartComponent);
+    fixture = TestBed.createComponent(TelemetryChartStandaloneComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

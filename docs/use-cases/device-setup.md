@@ -14,11 +14,13 @@
   1. The user selects a device with the GUID `{GUID}`
   1. The system tries to connect to the device GATT Primary Service.
   1. When successfully connected to the GATT Primary Service, the UI shows the [Network Setup Form](#network-setup-form).
-  1. The user fills the Network Setup form and clicks the Continue button.
+  1. The user fills the [Network Setup Form](#network-setup-form) and clicks the Continue button.
   1. The system, still connected to the BT device, writes the Wifi credentials info into the GATT Write Characteristic with GUID `{GUID}`.
   1. If the BT device responds with a success status code, then end BT connection.
   1. When disconnected, proceed with registering the Device by making an API call to [`PgotchiWebApi.Device.RegisterDevice`](#apis).
   1. When [`PgotchiWebApi.Device.RegisterDevice`](#apis) call succeeds, the UI shows the [Device Info Form](#device-info-form).
+  1. The user fills the [Device Info Form](#device-info-form) and clicks the Finalize button.
+  1. The UI shows a message indicating that the device has been successfully registered and the process is complete. Additionally, shows a link/button to navigate to the device telemetry dashboard.
 
   ### Outputs:
 
@@ -36,6 +38,8 @@
   - **Device Info Form.**  \
   Registers a new device.
     - Elements.
+      - **Device Avatar Figure**: The device avatar image. Shows the selected avatar image for preview.
+      - **Device Avatar** (*`input:file`*): The device avatar image URL.
       - **Device Name** (*`input:text`, `required`*): The device name.
       - **Device Description** (*`input:text`*): The device description.
       - **Device Location** (*`select`*): The device description.

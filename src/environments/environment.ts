@@ -1,9 +1,16 @@
-export const environment = {
+import { IAppEnvironment } from "./app-environment";
+
+export const environment: IAppEnvironment = {
+    bypassBluetoothAdapterCheck: false,
     pgotchiHttpClient: {
-        baseAddress: "http://localhost:5173",
+        baseAddress: "",
+    },
+    pgotchiFuncClient: {
+        baseAddress: "",
+        apiKey: "",
     },
     pgotchiIotHub: {
-        hostName: "pgotchi-dev-east-iothub.azure-devices.net",
+        hostName: "",
         port: 8883,
         eventHub: {
             consumerGroup: "webclients",
@@ -12,6 +19,6 @@ export const environment = {
         }
     },
     pgotchiSignalR: {
-        negotiateEndpoint: "https://pgotchi-dev-east.service.signalr.net/api",
+        negotiateEndpoint: "",
     },
 };
