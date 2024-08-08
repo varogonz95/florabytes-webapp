@@ -1,11 +1,20 @@
-<form (ngSubmit)="submitHandler()" autocomplete="off">
+<form #deviceInfoForm="ngForm" (ngSubmit)="submitHandler()" autocomplete="off">
     <h5 class="subtitle">Step 3.</h5>
     <h3 class="title">Identify your device.</h3>
 
     <div class="field is-flex is-justify-content-center">
         <figure class="image is-rounded is-128x128">
-            <img class="is-rounded" src="https://th.bing.com/th/id/OIG2.rz2dFkzSCJN4jZ3r3pbO?w=1024&h=1024&rs=1&pid=ImgDetMain" alt="No avatar image" />
+            <img class="is-rounded"
+                src="https://th.bing.com/th/id/OIG2.rz2dFkzSCJN4jZ3r3pbO?w=1024&h=1024&rs=1&pid=ImgDetMain"
+                alt="No avatar image" />
         </figure>
+    </div>
+
+    <div class="field has-text-centered">
+        <div class="control">
+            <input type="hidden" name="avatarImgUrl" [(ngModel)]="model.AvatarImgUrl" />
+            <button type="button" class="button is-small">Change avatar</button>
+        </div>
     </div>
 
     <!-- <div class="file is-justify-content-center">
@@ -24,7 +33,7 @@
 
     <div class="field has-text-centered">
         <div class="control">
-            <button type="button" class="button">Choose avatar</button>
+            <!-- <app-image-selector></app-image-selector> -->
         </div>
     </div>
 
@@ -69,7 +78,7 @@
 
     <div class="field">
         <div class="control">
-            <button type="submit" class="button is-link">Continue</button>
+            <button type="submit" class="button is-link" [disabled]="!deviceInfoForm.valid">Finalize</button>
         </div>
     </div>
 </form>

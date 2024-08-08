@@ -2,11 +2,11 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DeviceInfo } from '../../device-setup-page.component';
 
 @Component({
-    selector: 'app-edit-device-info-step',
-    templateUrl: './edit-device-info-step.component.html',
-    styleUrl: './edit-device-info-step.component.css'
+    selector: 'app-device-info-step',
+    templateUrl: './device-info-step.component.html',
+    styleUrl: './device-info-step.component.css'
 })
-export class EditDeviceInfoStepComponent {
+export class DeviceInfoStepComponent {
     @Input({ required: true }) public step = 0;
     @Input() public model: DeviceInfo = null!;
 

@@ -8,7 +8,10 @@
         <div class="columns is-centered is-multiline">
             <div class="column is-half">
                 <article class="card">
-                    @if (stepsSequence.length > 1 && stepsSequence[0] !== SetupSteps.Completed) {
+                    @if (
+                        stepsSequence.length > 1 &&
+                        [SetupSteps.Completed, SetupSteps.Error].includes(stepsSequence[0])
+                    ) {
                         <header class="card-header is-shadowless">
                             <button class="card-header-icon" type="button" aria-label="more options" (click)="goBack()">
                                 <span class="icon">
@@ -21,11 +24,10 @@
                     <div class="card-content">
                         @switch (stepsSequence[0]) {
                             @case (SetupSteps.ScanDevices) {
-                                <ng-template *ngComponentOutlet="stepSequence[0].component; inputs: stepSequence[0].args"></ng-template>
-                                <!-- <app-scan-devices-step 
+                                <app-scan-devices-step 
                                     (requestScan)="scanAndPairDevice()"
                                     [isConnecting]="connectingDevice">
-                                </app-scan-devices-step> -->
+                                </app-scan-devices-step>
                             }
                             @case (SetupSteps.NetworkSetup) {
                                 <app-network-setup-step 
@@ -34,16 +36,16 @@
                                 </app-network-setup-step>
                             }
                             @case (SetupSteps.EditDeviceInfo) {
-                                <app-edit-device-info-step
+                                <app-device-info-step
                                     [step]="stepsSequence[0]" 
                                     [model]="deviceInfo" 
                                     (submit)="submitDeviceInfo()">
-                                </app-edit-device-info-step>
+                                </app-device-info-step>
                             }
                             @case (SetupSteps.Completed) {
                                 <app-completed-step [deviceId]="deviceInfo.DeviceId"></app-completed-step>
                             }
-                            @case (SetupSteps.AdapterUnavailable) {
+                            @case (SetupSteps.Error) {
                                 <h3 class="title">Woops! :(</h3>
                                 <div class="content">
                                     <p>

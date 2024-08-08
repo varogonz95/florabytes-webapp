@@ -5,9 +5,11 @@
   ];
   idx.extensions = [
     "angular.ng-template"
+    "GitHub.vscode-pull-request-github"
+    "mhutchie.git-graph"
   ];
   idx.previews = {
-    enable = false;
+    enable = true;
     previews = {
       web = {
         command = [

@@ -1,8 +1,7 @@
-import { Component, Inject, OnInit, Type } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { APP_ENVIRONMENT } from '../../../core/providers/app-environment.provider';
 import { IAppEnvironment } from '../../../environments/app-environment';
 import { PgotchiHttpClientService, RegisterDeviceRequest } from '../../services/pgotchi-httpclient/pgotchi-http-client.service';
-import { ScanDevicesStepComponent } from './steps/scan-devices-step/scan-devices-step.component';
 
 const MaxRetries = 10;
 // Service and Characteristic UUIDs aliases can be found here:
@@ -16,7 +15,7 @@ enum SetupSteps {
     NetworkSetup,
     EditDeviceInfo,
     Completed,
-    AdapterUnavailable,
+    Error,
 }
 
 export interface DeviceInfo {
@@ -29,12 +28,6 @@ export interface DeviceInfo {
     Password?: string
 }
 
-interface Step<C = any> {
-    component: Type<C>,
-    args?: Record<string, any>
-}
-
-
 @Component({
     selector: 'app-device-setup-page',
     templateUrl: './device-setup-page.component.html',
@@ -42,18 +35,9 @@ interface Step<C = any> {
 })
 export class DeviceSetupPage implements OnInit {
     public connectingDevice = false;
-    public stepsSequence = [SetupSteps.ScanDevices];
+    public stepsSequence = [SetupSteps.EditDeviceInfo];
     public SetupSteps = SetupSteps;
     public deviceInfo: DeviceInfo;
-    public stepSequence: Step[] = [
-        {
-            component: ScanDevicesStepComponent,
-            args: {
-                isConnecting: this.connectingDevice,
-                requestScan: this.scanAndPairDevice
-            }
-        }
-    ]
 
     private gattCharacteristic: BluetoothRemoteGATTCharacteristic = null!;
 
@@ -74,7 +58,7 @@ export class DeviceSetupPage implements OnInit {
             navigator.bluetooth.getAvailability()
                 .then(isBluetoothAvailable => {
                     if (!isBluetoothAvailable) {
-                        this.stepsSequence = [SetupSteps.AdapterUnavailable];
+                        this.stepsSequence = [SetupSteps.Error];
                     }
                 })
                 .catch();
@@ -149,8 +133,10 @@ export class DeviceSetupPage implements OnInit {
 
         const wifiCredentials = JSON.stringify(this.deviceInfo);
         const buffer = Buffer.from(wifiCredentials);
+
         await this.gattCharacteristic.writeValueWithResponse(buffer);
 
+        this.gattCharacteristic.service.device.gatt?.disconnect();
         this.stepsSequence.unshift(SetupSteps.EditDeviceInfo);
     }
 
@@ -164,13 +150,8 @@ export class DeviceSetupPage implements OnInit {
                 "avatarImgUrl": this.deviceInfo.AvatarImgUrl,
             }
         }
-        this.pgotchiHttpClient.registerDevice(request)
-            .then(() => {
-                this.stepsSequence.unshift(SetupSteps.Completed);
-            })
-            .catch(err => {
-                console.log(err);
-            })
+        const summary = await this.pgotchiHttpClient.registerDevice(request)
+        console.log(summary);
     }
 
     public goBack() {
