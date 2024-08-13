@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { catchError, map, throwError } from 'rxjs';
 import { APP_ENVIRONMENT } from '../../../core/providers/app-environment.provider';
-import { IAppEnvironment } from '../../../environments/app-environment';
+import { IAppEnvironment } from '../../../core/providers/app-environment';
 import { DeviceSummary, DeviceTwinSummary } from '../../models/device-summary';
 
 export interface RegisterDeviceRequest {
@@ -20,14 +20,14 @@ export class PgotchiHttpClientService {
     private getRegisterDeviceUrl = () => `${this.baseAddress}/Device`;
 
     constructor(
-        private readonly httpclient: HttpClient,
+        private readonly httpClient: HttpClient,
         @Inject(APP_ENVIRONMENT) env: IAppEnvironment
     ) {
         this.baseAddress = env.pgotchiHttpClient.baseAddress;
     }
 
     public getDevices() {
-        return this.httpclient
+        return this.httpClient
             .get(this.getDevicesUrl())
             .pipe(
                 map(response => response as DeviceSummary[])
@@ -35,7 +35,7 @@ export class PgotchiHttpClientService {
     }
 
     public getDeviceById(deviceId: string) {
-        return this.httpclient
+        return this.httpClient
             .get(this.getDeviceByIdUrl(deviceId))
             .pipe(
                 catchError((err, caught) => {
@@ -46,8 +46,8 @@ export class PgotchiHttpClientService {
             );
     }
 
-    public async registerDevice(request: RegisterDeviceRequest) {
-        return this.httpclient
+    public registerDevice(request: RegisterDeviceRequest) {
+        return this.httpClient
             .post(this.getRegisterDeviceUrl(), request)
             .pipe(
                 catchError((err, caught) => {

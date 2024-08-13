@@ -1,7 +1,8 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { APP_ENVIRONMENT } from '../../../core/providers/app-environment.provider';
-import { IAppEnvironment } from '../../../environments/app-environment';
+import { IAppEnvironment } from '../../../core/providers/app-environment';
 import { PgotchiHttpClientService, RegisterDeviceRequest } from '../../services/pgotchi-httpclient/pgotchi-http-client.service';
+import { firstValueFrom } from 'rxjs';
 
 const MaxRetries = 10;
 // Service and Characteristic UUIDs aliases can be found here:
@@ -28,6 +29,14 @@ export interface DeviceInfo {
     Password?: string
 }
 
+const DefaultDeviceInfo: DeviceInfo = {
+    DeviceId: '',
+    DeviceName: '',
+    DeviceLocation: '',
+    AvatarImgUrl: 'https://placehold.co/128x128?text=No+Avatar',
+    Ssid: ''
+}
+
 @Component({
     selector: 'app-device-setup-page',
     templateUrl: './device-setup-page.component.html',
@@ -45,12 +54,7 @@ export class DeviceSetupPage implements OnInit {
         @Inject(APP_ENVIRONMENT)
         private readonly env: IAppEnvironment,
         private readonly pgotchiHttpClient: PgotchiHttpClientService) {
-        this.deviceInfo = {
-            DeviceId: '',
-            DeviceName: '',
-            DeviceLocation: '',
-            Ssid: ''
-        };
+        this.deviceInfo = DefaultDeviceInfo;
     }
 
     ngOnInit(): void {
@@ -142,7 +146,7 @@ export class DeviceSetupPage implements OnInit {
 
     public async submitDeviceInfo() {
         const request: RegisterDeviceRequest = {
-            deviceId: this.deviceInfo.DeviceId,
+            deviceId: this.deviceInfo.DeviceId ?? "simulated-device-002",
             properties: {
                 "deviceName": this.deviceInfo.DeviceName,
                 "deviceDescription": this.deviceInfo.DeviceDescription,
@@ -150,8 +154,10 @@ export class DeviceSetupPage implements OnInit {
                 "avatarImgUrl": this.deviceInfo.AvatarImgUrl,
             }
         }
-        const summary = await this.pgotchiHttpClient.registerDevice(request)
+        const summary = await firstValueFrom(this.pgotchiHttpClient.registerDevice(request));
         console.log(summary);
+
+        this.stepsSequence.unshift(SetupSteps.Completed);
     }
 
     public goBack() {

@@ -1,4 +1,4 @@
-import { IAppEnvironment } from "./app-environment";
+import { IAppEnvironment } from "../core/providers/app-environment";
 
 export const environment: IAppEnvironment = {
     bypassBluetoothAdapterCheck: false,

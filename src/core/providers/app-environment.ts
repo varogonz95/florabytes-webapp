@@ -1,5 +1,9 @@
 export interface IAppEnvironment {
     bypassBluetoothAdapterCheck?: boolean,
+    imageProvider: {
+        baseUrl: string,
+        getCollectionsQueryParams?: Record<string, any>
+    },
     pgotchiFuncClient: {
         baseAddress: string,
         apiKey?: string

@@ -8,6 +8,7 @@ import { CompletedStepComponent } from './steps/completed-step/completed-step.co
 import { DeviceInfoStepComponent } from './steps/device-info-step/device-info-step.component';
 import { NetworkSetupStepComponent } from './steps/network-setup-step/network-setup-step.component';
 import { ScanDevicesStepComponent } from './steps/scan-devices-step/scan-devices-step.component';
+import { ImageSelectorService } from '../../services/image-selector/image-selector.service';
 
 @NgModule({
     id: DeviceSetupPageModule.name,
@@ -23,11 +24,12 @@ import { ScanDevicesStepComponent } from './steps/scan-devices-step/scan-devices
         FormsModule,
         RouterModule,
     ],
-    providers: [
-        provideAppEnvironment(),
-    ],
     exports: [
         DeviceSetupPage,
+    ],
+    providers: [
+        provideAppEnvironment(),
+        ImageSelectorService,
     ],
 })
 export class DeviceSetupPageModule { }

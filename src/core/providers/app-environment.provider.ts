@@ -1,5 +1,5 @@
 import { InjectionToken, EnvironmentProviders, makeEnvironmentProviders } from "@angular/core";
-import { IAppEnvironment } from "../../environments/app-environment";
+import { IAppEnvironment } from "./app-environment";
 import { environment } from "../../environments/environment";
 
 export const APP_ENVIRONMENT = new InjectionToken<IAppEnvironment>('APP_ENVIRONMENT');

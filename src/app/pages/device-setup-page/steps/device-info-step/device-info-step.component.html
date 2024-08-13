@@ -5,7 +5,7 @@
     <div class="field is-flex is-justify-content-center">
         <figure class="image is-rounded is-128x128">
             <img class="is-rounded"
-                src="https://th.bing.com/th/id/OIG2.rz2dFkzSCJN4jZ3r3pbO?w=1024&h=1024&rs=1&pid=ImgDetMain"
+                [src]="model.AvatarImgUrl"
                 alt="No avatar image" />
         </figure>
     </div>
@@ -13,7 +13,7 @@
     <div class="field has-text-centered">
         <div class="control">
             <input type="hidden" name="avatarImgUrl" [(ngModel)]="model.AvatarImgUrl" />
-            <button type="button" class="button is-small">Change avatar</button>
+            <button type="button" class="button is-small" (click)="showImageSelector()">Change avatar</button>
         </div>
     </div>
 
@@ -30,12 +30,6 @@
             }
         </label>
     </div> -->
-
-    <div class="field has-text-centered">
-        <div class="control">
-            <!-- <app-image-selector></app-image-selector> -->
-        </div>
-    </div>
 
     <div class="field">
         <label for="" class="label">Device Name</label>
