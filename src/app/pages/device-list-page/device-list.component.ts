@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, catchError, finalize, throwError } from 'rxjs';
+import { DeviceTwinSummary } from '../../models/device-summary';
 import { PgotchiHttpClientService } from '../../services/pgotchi-httpclient/pgotchi-http-client.service';
-import { DeviceSummary } from '../../models/device-summary';
 
 @Component({
     selector: 'app-device-list',
@@ -12,7 +12,7 @@ export class DeviceListPage implements OnInit {
 
     public loading = true;
     public errors: Error[] = [];
-    public $devices = new Observable<DeviceSummary[]>();
+    public $devices = new Observable<DeviceTwinSummary[]>();
 
     constructor(private readonly _pgotchiService: PgotchiHttpClientService) {
     }
@@ -25,7 +25,7 @@ export class DeviceListPage implements OnInit {
         this.$devices = this._pgotchiService
             .getDevices()
             .pipe(
-                catchError((error, caught) => {
+                catchError((error, _caught) => {
                     this.errors.push(error);
                     return throwError(() => error);
                 }),

@@ -9,7 +9,7 @@
             </div>
         </nav>
         
-        <div class="fixed-grid">
+        <div class="fixed-grid has-3-cols">
             <div class="grid">
                 @if (loading) {
                     @for (i of [1, 2]; track $index) {
@@ -17,10 +17,15 @@
                     }
                 }
 
-                @for (device of $devices | async; track $index) {
+                @for (twin of $devices | async; track $index) {
                     <div class="cell">
-                        <a [routerLink]="['devices', device.id, 'telemetry']">
-                            <app-device-summary-card [device]="device"></app-device-summary-card>
+                        <a [routerLink]="['/', 'devices', twin.id, 'telemetry']">
+                            <app-device-summary-card
+                                [deviceId]="twin.id"
+                                [connectionState]="twin.connectionState"
+                                [imgUrl]="twin.tags!['avatarImgUrl']"
+                                [lastActivityTime]="twin.lastActivityTime">
+                            </app-device-summary-card>
                         </a>
                     </div>
                 }

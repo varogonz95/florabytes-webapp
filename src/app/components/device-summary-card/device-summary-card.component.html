@@ -1,7 +1,7 @@
 <article class="media box">
     <figure class="media-left">
         <p class="image is-64x64" [ngClass]="{'is-skeleton': useSkeleton}">
-            <img alt src="https://bulma.io/assets/images/placeholders/128x128.png" />
+            <img class="is-rounded" alt="No pic" [src]="imgUrl" />
         </p>
     </figure>
     <div class="media-content">
@@ -22,10 +22,10 @@
             }
             @else {
                 <p>
-                    <span class="tag is-rounded" [ngClass]="resolveConnectionStateTagClass(device.connectionState)">{{device.connectionState}}</span>&nbsp;
-                    <strong>{{device.id}}</strong>&nbsp;
+                    <span class="tag is-rounded" [ngClass]="resolveConnectionStateClass(connectionState)">{{connectionState}}</span>&nbsp;
+                    <strong>{{deviceId}}</strong>&nbsp;
                     <br/>
-                    <small>{{device.lastActivityTime | date:'medium'}}</small>&nbsp;
+                    <small>{{lastActivityTime | date:'medium'}}</small>&nbsp;
                 </p>
             }
         </div>

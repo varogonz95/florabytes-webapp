@@ -1,4 +1,4 @@
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
@@ -8,10 +8,18 @@ import { AppComponent } from './app.component';
 import { DeviceSummaryCardComponent } from './components/device-summary-card/device-summary-card.component';
 import { MessageComponent } from './components/message/message.component';
 import { NavHeaderComponent } from './components/nav-header/nav-header.component';
-import { TelemetryChartComponent } from './components/telemetry-chart/telemetry-chart.component';
+import { TelemetryChartStandaloneComponent } from './components/telemetry-chart/telemetry-chart-standalone.component';
 import { DeviceListPage } from './pages/device-list-page/device-list.component';
-import { DeviceSetupPage } from './pages/device-setup-page/device-setup-page.component';
+import { DeviceSetupPageModule } from './pages/device-setup-page/device-setup-page.module';
 import { DeviceTelemetryPage } from './pages/device-telemetry-page/device-telemetry-page.component';
+
+const PagesModules = [
+    DeviceSetupPageModule
+];
+
+const StandaloneComponents = [
+    TelemetryChartStandaloneComponent
+]
 
 @NgModule({
     declarations: [
@@ -19,20 +27,20 @@ import { DeviceTelemetryPage } from './pages/device-telemetry-page/device-teleme
         NavHeaderComponent,
         DeviceSummaryCardComponent,
         MessageComponent,
-        
+
         DeviceListPage,
         DeviceTelemetryPage,
-        DeviceSetupPage,
     ],
     imports: [
         BrowserModule,
         AppRoutingModule,
         FormsModule,
-        TelemetryChartComponent,
+        ...PagesModules,
+        ...StandaloneComponents,
     ],
     providers: [
         provideCharts(withDefaultRegisterables()),
-        provideHttpClient(withInterceptorsFromDi())
+        provideHttpClient(),
     ],
     bootstrap: [AppComponent],
 })

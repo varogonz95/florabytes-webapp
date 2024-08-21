@@ -1,0 +1,25 @@
+<!-- <form (ngSubmit)="submitHandler()"> -->
+<form>
+    <h5 class="subtitle">Step 2.</h5>
+    <h3 class="title">Config your local network.</h3>
+
+    <div class="field">
+        <label for="" class="label">Network SSID</label>
+        <div class="control">
+            <input type="text" class="input" name="ssid" [(ngModel)]="model.Ssid" />
+        </div>
+    </div>
+
+    <div class="field">
+        <label for="" class="label">Password</label>
+        <div class="control">
+            <input type="password" class="input" name="pwd" [(ngModel)]="model.Password" />
+        </div>
+    </div>
+
+    <div class="field">
+        <div class="control">
+            <button type="button" class="button is-link" (click)="submitHandler()">Connect</button>
+        </div>
+    </div>
+</form>

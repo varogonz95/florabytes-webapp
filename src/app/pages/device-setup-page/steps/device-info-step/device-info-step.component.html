@@ -1,0 +1,78 @@
+<form #deviceInfoForm="ngForm" autocomplete="off">
+    <h5 class="subtitle">Step 3.</h5>
+    <h3 class="title">Identify your device.</h3>
+
+    <div class="field is-flex is-justify-content-center">
+        <figure class="image is-rounded is-128x128">
+            <img class="is-rounded"
+                [src]="model.AvatarImgUrl"
+                alt="No avatar image" />
+        </figure>
+    </div>
+
+    <div class="field has-text-centered">
+        <div class="control">
+            <input type="hidden" name="avatarImgUrl" [(ngModel)]="model.AvatarImgUrl" />
+            <button type="button" class="button is-small" (click)="showImageSelector()">Change avatar</button>
+        </div>
+    </div>
+
+    <!-- <div class="file is-justify-content-center">
+        <label class="file-label">
+            <input class="file-input" type="file" name="avatarImg" [(ngModel)]="model.AvatarImgUrl" />
+            @if(!model.AvatarImgUrl?.trim()) {
+                <span class="file-cta">
+                    <span class="file-label"> Choose a file… </span>
+                </span>
+            }
+            @else {
+                <span class="file-name">{{model.AvatarImgUrl}}</span>
+            }
+        </label>
+    </div> -->
+
+    <div class="field">
+        <label for="" class="label">Device Name</label>
+        <div class="control">
+            <input name="deviceName" type="text" class="input" [(ngModel)]="model.Name" required />
+        </div>
+    </div>
+
+    <div class="field">
+        <label for="" class="label">Short description</label>
+        <div class="control">
+            <input type="text" class="input" name="deviceDescription" [(ngModel)]="model.Description" />
+        </div>
+    </div>
+
+    <div class="columns">
+        <div class="field column">
+            <label for="" class="label">Location</label>
+            <div class="select">
+                <select name="location" [(ngModel)]="model.DeviceLocation">
+                    <option value="" selected disabled>-Select a location-</option>
+                    <!-- <option value="new">+ Add new location</option> -->
+                    <option value="Bedroom">Bedroom</option>
+                    <option value="Living Room">Living Room</option>
+                    <option value="Kitchen">Kitchen</option>
+                    <option value="Bathroom">Bathroom</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        </div>
+        <!-- @if (model.DeviceLocation === 'new') {
+            <div class="field column">
+                <label for="" class="label">&nbsp;</label>
+                <div class="control">
+                    <input type="text" class="input" name="location" placeholder="New location" [(ngModel)]="newDeviceLocation" />
+                </div>
+            </div>
+        } -->
+    </div>
+
+    <div class="field">
+        <div class="control">
+            <button type="button" class="button is-link" [disabled]="!deviceInfoForm.valid" (click)="submitHandler()">Finalize</button>
+        </div>
+    </div>
+</form>

@@ -9,3 +9,8 @@ export interface DeviceSummary {
     connectionState: string
     lastActivityTime: string
 }
+
+export interface DeviceTwinSummary extends DeviceSummary {
+    tags?: Record<string, any>
+    properties?: Record<string, any>
+}

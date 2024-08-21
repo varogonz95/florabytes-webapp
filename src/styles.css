@@ -1,1 +1,12 @@
 /* You can add global styles to this file, and also import other style files */
+
+.is-rounded-square {
+    border-radius: var(--bulma-control-radius);
+}
+
+.is-focused {
+    --bulma-button-border-width: 1px;
+    border-width: var(--bulma-button-border-width);
+    border-color: hsl(var(--bulma-focus-h), var(--bulma-focus-s), var(--bulma-focus-l));
+    box-shadow: var(--bulma-focus-shadow-size) hsla(var(--bulma-focus-h), var(--bulma-focus-s), var(--bulma-focus-l), var(--bulma-focus-shadow-alpha));
+}
