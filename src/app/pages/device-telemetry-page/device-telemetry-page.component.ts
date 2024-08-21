@@ -1,8 +1,9 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from "@angular/router";
 import * as signalR from "@microsoft/signalr";
 import { Observable, Subject, map, scan } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { IAppEnvironment } from '../../../core/providers/app-environment';
+import { APP_ENVIRONMENT } from '../../../core/providers/app-environment.provider';
 import { DeviceSummary } from "../../models/device-summary";
 
 const MAX_RECORDS = 30;
@@ -21,6 +22,8 @@ export class DeviceTelemetryPage implements OnInit, OnDestroy {
     private readonly telemetrySub$ = new Subject<SensorData>();
 
     constructor(
+        @Inject(APP_ENVIRONMENT)
+        private readonly env: IAppEnvironment,
         private readonly _activatedRoute: ActivatedRoute) {
     }
 
@@ -67,7 +70,7 @@ export class DeviceTelemetryPage implements OnInit, OnDestroy {
                 })),
             );
 
-        const { negotiateEndpoint } = environment.pgotchiSignalR;
+        const { negotiateEndpoint } = this.env.pgotchiSignalR;
 
         this.signalRHubConnection = new signalR.HubConnectionBuilder()
             .withUrl(negotiateEndpoint, {

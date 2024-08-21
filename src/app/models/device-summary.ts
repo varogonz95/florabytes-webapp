@@ -11,5 +11,6 @@ export interface DeviceSummary {
 }
 
 export interface DeviceTwinSummary extends DeviceSummary {
+    tags?: Record<string, any>
     properties?: Record<string, any>
 }

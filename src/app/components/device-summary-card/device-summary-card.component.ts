@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { DeviceSummary } from '../../models/device-summary';
 
 @Component({
     selector: 'app-device-summary-card',
@@ -7,25 +6,14 @@ import { DeviceSummary } from '../../models/device-summary';
     styleUrl: './device-summary-card.component.css'
 })
 export class DeviceSummaryCardComponent {
-    @Input()
-    public useSkeleton = false;
+    @Input({}) public connectionState?: string = "Unknown";
+    @Input() public deviceId?: string;
+    @Input() public imgUrl?: string;
+    @Input() public lastActivityTime?: string;
+    @Input() public status?: string = "Unknown";
+    @Input() public useSkeleton = false;
 
-    @Input()
-    public device: DeviceSummary = {
-        connectionState: "Unknown",
-        deviceETag: "",
-        id: "",
-        eTag: "",
-        lastActivityTime: "",
-        status: "Unknown",
-        userId: "",
-    }
-
-    constructor() {
-
-    }
-
-    public resolveConnectionStateTagClass(connectionState: string): string {
+    public resolveConnectionStateClass(connectionState = "Unknown"): string {
         switch (connectionState) {
             case 'Connected':
                 return 'is-success';
