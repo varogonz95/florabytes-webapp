@@ -1,5 +1,6 @@
 export interface IAppEnvironment {
     bypassBluetoothAdapterCheck?: boolean,
+    simulateMobileUserAgent?: boolean,
     imageProvider: {
         baseUrl: string,
         getCollectionsQueryParams?: Record<string, any>

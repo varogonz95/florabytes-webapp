@@ -5,10 +5,12 @@ import { PgotchiHttpClientService, RegisterDeviceRequest } from '../../services/
 import { firstValueFrom } from 'rxjs';
 
 const MaxRetries = 10;
+const RetryInterval = 3000;
+
 // Service and Characteristic UUIDs aliases can be found here:
 // https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/modules/bluetooth/bluetooth_uuid.cc
-const ServiceGuid = /* "0742a8ea-396a-4947-9962-f2fab085854a" */ 'user_data';
-const WriteCharacteristicGuid = /* "0742a8ea-396a-4947-9962-f2fab085854f" */ 'user_control_point';
+const UserDataServiceUuid = /* "0742a8ea-396a-4947-9962-f2fab085854a" */ 'user_data'; // UUID: 0x181C
+const UserControlPointUuid = /* "0742a8ea-396a-4947-9962-f2fab085854f" */ 'user_control_point'; // UUID: 0x2A9F
 
 enum SetupSteps {
     ScanDevices,
@@ -19,19 +21,22 @@ enum SetupSteps {
     Error,
 }
 
-export interface DeviceInfo {
-    DeviceId: string;
-    DeviceName: string;
-    DeviceDescription?: string;
-    DeviceLocation?: string;
-    AvatarImgUrl?: string;
+export interface WifiCredentials {
     Ssid: string
     Password?: string
 }
 
+export interface DeviceInfo extends WifiCredentials {
+    DeviceId: string
+    Name: string
+    Description?: string
+    DeviceLocation?: string
+    AvatarImgUrl?: string
+}
+
 const DefaultDeviceInfo: DeviceInfo = {
     DeviceId: '',
-    DeviceName: '',
+    Name: '',
     DeviceLocation: '',
     AvatarImgUrl: 'https://placehold.co/128x128?text=No+Avatar',
     Ssid: ''
@@ -44,11 +49,11 @@ const DefaultDeviceInfo: DeviceInfo = {
 })
 export class DeviceSetupPage implements OnInit {
     public connectingDevice = false;
-    public stepsSequence = [SetupSteps.EditDeviceInfo];
+    public stepsSequence = [SetupSteps.ScanDevices];
     public SetupSteps = SetupSteps;
     public deviceInfo: DeviceInfo;
 
-    private gattCharacteristic: BluetoothRemoteGATTCharacteristic = null!;
+    private characteristic: BluetoothRemoteGATTCharacteristic = null!;
 
     constructor(
         @Inject(APP_ENVIRONMENT)
@@ -72,11 +77,13 @@ export class DeviceSetupPage implements OnInit {
         this.connectingDevice = true;
         try {
             const device = await this.selectDevice();
-            this.deviceInfo.DeviceId = device.id;
-            this.deviceInfo.DeviceName = device.name ?? device.id;
-
             const gattService = await this.connectToGattService(device);
-            this.gattCharacteristic = await gattService.getCharacteristic(WriteCharacteristicGuid);
+            this.characteristic = await gattService.getCharacteristic(UserControlPointUuid);
+
+            const staticValue = await this.characteristic.readValue();
+            this.deviceInfo.Name = device.name ?? device.id;
+            this.deviceInfo.DeviceId = Buffer.from(staticValue.buffer).toString('utf8');
+
             this.stepsSequence.unshift(SetupSteps.NetworkSetup);
         }
         catch (reason) {
@@ -88,11 +95,19 @@ export class DeviceSetupPage implements OnInit {
     }
 
     private async selectDevice() {
-        return await navigator.bluetooth.requestDevice({
-            // acceptAllDevices: true,
-            // optionalServices: [ServiceGuid],
-            filters: [{ services: [ServiceGuid] }]
-        });
+        let options: RequestDeviceOptions;
+        if (this.env.simulateMobileUserAgent) {
+            options = {
+                acceptAllDevices: true,
+                optionalServices: [UserDataServiceUuid],
+            }
+        }
+        else {
+            options = {
+                filters: [{ services: [UserDataServiceUuid] }]
+            }
+        }
+        return await navigator.bluetooth.requestDevice(options);
     }
 
     private async connectToGattService(device: BluetoothDevice): Promise<BluetoothRemoteGATTService> {
@@ -103,54 +118,59 @@ export class DeviceSetupPage implements OnInit {
         let gattService: BluetoothRemoteGATTService = null!;
         let gattServer: BluetoothRemoteGATTServer = null!;
 
-        const intervalId = setInterval(async () => {
-            if (retryCount < MaxRetries) {
-                try {
-                    gattServer = await device.gatt!.connect();
-                    gattService = await gattServer.getPrimaryService(ServiceGuid);
+        await new Promise((resolve, reject) => {
+            const intervalId = setInterval(async () => {
+                if (retryCount < MaxRetries) {
+                    try {
+                        gattServer = await device.gatt!.connect();
+                        gattService = await gattServer.getPrimaryService(UserDataServiceUuid);
+                        clearInterval(intervalId);
+                        resolve(gattService);
+                    }
+                    catch (err) {
+                        retryCount++;
+                        console.log(`Could not connect to primary service. Retry ${retryCount} of ${MaxRetries}...`);
+                    }
                 }
-                catch (err) {
-                    retryCount++;
-                    console.log(`Could not connect to primary service. Retry ${retryCount} of ${MaxRetries}...`);
+                else {
+                    clearInterval(intervalId);
+                    reject(new Error("Could not connect to GATT Server."));
                 }
-            }
-            else {
-                clearInterval(intervalId);
-                throw new Error("Could not connect to GATT Server.");
-            }
-        }, 1000);
+            }, RetryInterval);
+        })
 
         if (!gattServer?.connected) {
             throw new Error("Could not connect to GATT Server.");
         }
 
         if (!gattService) {
-            throw new Error(`Could not get primary service {${ServiceGuid}}.`);
+            throw new Error(`Could not get primary service {${UserDataServiceUuid}}.`);
         }
 
         return gattService;
     }
 
     public async submitWifiCredentials() {
-        if (!this.gattCharacteristic)
+        if (!this.characteristic)
             throw new Error("GATT Write Characteristic cannot be null.");
 
-        const wifiCredentials = JSON.stringify(this.deviceInfo);
+        const { Ssid, Password } = this.deviceInfo
+        const wifiCredentials = `Ssid:${Ssid};Password:${Password}`;
         const buffer = Buffer.from(wifiCredentials);
 
-        await this.gattCharacteristic.writeValueWithResponse(buffer);
+        await this.characteristic.writeValueWithResponse(buffer);
+        this.characteristic.service.device.gatt?.disconnect();
 
-        this.gattCharacteristic.service.device.gatt?.disconnect();
         this.stepsSequence.unshift(SetupSteps.EditDeviceInfo);
     }
 
     public async submitDeviceInfo() {
         const request: RegisterDeviceRequest = {
-            deviceId: this.deviceInfo.DeviceId ?? "simulated-device-002",
+            deviceId: this.deviceInfo.DeviceId,
             properties: {
-                "deviceName": this.deviceInfo.DeviceName,
-                "deviceDescription": this.deviceInfo.DeviceDescription,
-                "deviceLocation": this.deviceInfo.DeviceLocation,
+                "name": this.deviceInfo.Name,
+                "description": this.deviceInfo.Description,
+                "location": this.deviceInfo.DeviceLocation,
                 "avatarImgUrl": this.deviceInfo.AvatarImgUrl,
             }
         }

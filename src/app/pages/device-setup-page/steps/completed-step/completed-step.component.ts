@@ -8,7 +8,7 @@ import { Component, Input } from '@angular/core';
     <h3 class="title">Device Setup Complete!</h3>
     <div class="content">
         <p>
-            Now your device network is set up!
+            Your device is now setup and ready to use!
         </p>
     </div>
     <a [routerLink]="['devices', deviceId]" class="button is-link">Go to Device Telemetry</a>`,

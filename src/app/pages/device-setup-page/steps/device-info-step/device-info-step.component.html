@@ -1,4 +1,4 @@
-<form #deviceInfoForm="ngForm" (ngSubmit)="submitHandler()" autocomplete="off">
+<form #deviceInfoForm="ngForm" autocomplete="off">
     <h5 class="subtitle">Step 3.</h5>
     <h3 class="title">Identify your device.</h3>
 
@@ -34,14 +34,14 @@
     <div class="field">
         <label for="" class="label">Device Name</label>
         <div class="control">
-            <input name="deviceName" type="text" class="input" [(ngModel)]="model.DeviceName" required />
+            <input name="deviceName" type="text" class="input" [(ngModel)]="model.Name" required />
         </div>
     </div>
 
     <div class="field">
         <label for="" class="label">Short description</label>
         <div class="control">
-            <input type="text" class="input" name="deviceDescription" [(ngModel)]="model.DeviceDescription" />
+            <input type="text" class="input" name="deviceDescription" [(ngModel)]="model.Description" />
         </div>
     </div>
 
@@ -72,7 +72,7 @@
 
     <div class="field">
         <div class="control">
-            <button type="submit" class="button is-link" [disabled]="!deviceInfoForm.valid">Finalize</button>
+            <button type="button" class="button is-link" [disabled]="!deviceInfoForm.valid" (click)="submitHandler()">Finalize</button>
         </div>
     </div>
 </form>
