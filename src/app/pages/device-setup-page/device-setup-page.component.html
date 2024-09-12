@@ -31,8 +31,9 @@
                                     [isScanning]="isScanning"
                                     [isConnecting]="isConnecting">
                                 </app-scan-devices-step>
+                                
                                 @if (connectionFailedError) {
-                                    <app-message [type]="'danger'">Fuck</app-message>
+                                    <app-message [type]="'danger'">{{connectionFailedError.message}}</app-message>
                                 }
                             }
                             @case (SetupSteps.NetworkSetup) {
