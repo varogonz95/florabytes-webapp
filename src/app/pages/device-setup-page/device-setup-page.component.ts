@@ -48,10 +48,14 @@ const DefaultDeviceInfo: DeviceInfo = {
     styleUrl: './device-setup-page.component.css',
 })
 export class DeviceSetupPage implements OnInit {
-    public connectingDevice = false;
+    public isConnecting = false;
+    public isScanning = false;
     public stepsSequence = [SetupSteps.ScanDevices];
     public SetupSteps = SetupSteps;
     public deviceInfo: DeviceInfo;
+    public connectionFailedError?: Error;
+    public deviceName: string = null!;
+    public retryCount = 0;
 
     private characteristic: BluetoothRemoteGATTCharacteristic = null!;
 
@@ -74,15 +78,20 @@ export class DeviceSetupPage implements OnInit {
     }
 
     public async scanAndPairDevice() {
-        this.connectingDevice = true;
         try {
+            this.isScanning = true;
             const device = await this.selectDevice();
+            this.deviceName = device.name ?? device.id;
+            this.isScanning = false;
+
+            this.isConnecting = true;
             const gattService = await this.connectToGattService(device);
             this.characteristic = await gattService.getCharacteristic(UserControlPointUuid);
 
             const staticValue = await this.characteristic.readValue();
             this.deviceInfo.Name = device.name ?? device.id;
             this.deviceInfo.DeviceId = Buffer.from(staticValue.buffer).toString('utf8');
+            this.isConnecting = false;
 
             this.stepsSequence.unshift(SetupSteps.NetworkSetup);
         }
@@ -90,7 +99,8 @@ export class DeviceSetupPage implements OnInit {
             console.log(reason);
         }
         finally {
-            this.connectingDevice = false;
+            this.isConnecting = false;
+            this.isScanning = false;
         }
     }
 
@@ -114,13 +124,13 @@ export class DeviceSetupPage implements OnInit {
         if (!device?.gatt)
             throw new Error("GATT not available.");
 
-        let retryCount = 0;
-        let gattService: BluetoothRemoteGATTService = null!;
+        this.retryCount = 0;
         let gattServer: BluetoothRemoteGATTServer = null!;
+        let gattService: BluetoothRemoteGATTService = null!;
 
         await new Promise((resolve, reject) => {
             const intervalId = setInterval(async () => {
-                if (retryCount < MaxRetries) {
+                if (this.retryCount < MaxRetries) {
                     try {
                         gattServer = await device.gatt!.connect();
                         gattService = await gattServer.getPrimaryService(UserDataServiceUuid);
@@ -128,13 +138,15 @@ export class DeviceSetupPage implements OnInit {
                         resolve(gattService);
                     }
                     catch (err) {
-                        retryCount++;
-                        console.log(`Could not connect to primary service. Retry ${retryCount} of ${MaxRetries}...`);
+                        this.retryCount++;
+                        console.log(`Could not connect to primary service. Retry ${this.retryCount} of ${MaxRetries}...`);
                     }
                 }
                 else {
+                    const error = new Error("Could not connect to GATT Server.");
+                    this.connectionFailedError = error;
                     clearInterval(intervalId);
-                    reject(new Error("Could not connect to GATT Server."));
+                    reject(error);
                 }
             }, RetryInterval);
         })
@@ -155,7 +167,7 @@ export class DeviceSetupPage implements OnInit {
             throw new Error("GATT Write Characteristic cannot be null.");
 
         const { Ssid, Password } = this.deviceInfo
-        const wifiCredentials = `Ssid:${Ssid};Password:${Password}`;
+        const wifiCredentials = JSON.stringify({ Ssid, Password });
         const buffer = Buffer.from(wifiCredentials);
 
         await this.characteristic.writeValueWithResponse(buffer);

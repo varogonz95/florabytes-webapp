@@ -1,4 +1,4 @@
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from "@angular/router";
 import * as signalR from "@microsoft/signalr";
 import { Observable, Subject, map, scan } from 'rxjs';
@@ -12,6 +12,7 @@ const MAX_RECORDS = 30;
     selector: 'app-device-telemetry-page',
     templateUrl: './device-telemetry-page.component.html',
     styleUrl: './device-telemetry-page.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DeviceTelemetryPage implements OnInit, OnDestroy {
     public deviceSummary!: DeviceSummary;
