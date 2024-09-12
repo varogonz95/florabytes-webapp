@@ -1,4 +1,5 @@
 export interface IAppEnvironment {
+    maxPairingRetries: number,
     bypassBluetoothAdapterCheck?: boolean,
     simulateMobileUserAgent?: boolean,
     imageProvider: {

@@ -25,9 +25,15 @@
                         @switch (stepsSequence[0]) {
                             @case (SetupSteps.ScanDevices) {
                                 <app-scan-devices-step 
+                                    [deviceName]="deviceName"
+                                    [retryCount]="retryCount"
                                     (requestScan)="scanAndPairDevice()"
-                                    [isConnecting]="connectingDevice">
+                                    [isScanning]="isScanning"
+                                    [isConnecting]="isConnecting">
                                 </app-scan-devices-step>
+                                @if (connectionFailedError) {
+                                    <app-message [type]="'danger'">Fuck</app-message>
+                                }
                             }
                             @case (SetupSteps.NetworkSetup) {
                                 <app-network-setup-step 
