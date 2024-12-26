@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { catchError, map, throwError } from 'rxjs';
-import { APP_ENVIRONMENT } from '../../../core/providers/app-environment.provider';
-import { IAppEnvironment } from '../../../core/providers/app-environment';
+import { APP_ENVIRONMENT } from '../../providers/app-environment.provider';
+import { IAppEnvironment } from '../../providers/app-environment';
 import { DeviceSummary, DeviceTwinSummary } from '../../models/device-summary';
 
 export interface RegisterDeviceRequest {
