@@ -1,10 +1,9 @@
-import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from "@angular/router";
-import * as signalR from "@microsoft/signalr";
+import * as SignalR from '@microsoft/signalr';
 import { Observable, Subject, map, scan } from 'rxjs';
-import { IAppEnvironment } from '../../../core/providers/app-environment';
-import { APP_ENVIRONMENT } from '../../../core/providers/app-environment.provider';
 import { DeviceSummary } from "../../models/device-summary";
+import { TelemetryHubService } from '../../services/telemetry-hub/telemetry-hub.service';
 
 const MAX_RECORDS = 30;
 
@@ -15,22 +14,21 @@ const MAX_RECORDS = 30;
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DeviceTelemetryPage implements OnInit, OnDestroy {
-    public deviceSummary!: DeviceSummary;
+    public device!: DeviceSummary;
     public telemetryLogs$!: Observable<SensorData[]>;
     public chartDatasets$!: Observable<any>;
 
-    private signalRHubConnection!: signalR.HubConnection
     private readonly telemetrySub$ = new Subject<SensorData>();
+    private telemetryHubConnection!: SignalR.HubConnection;
 
     constructor(
-        @Inject(APP_ENVIRONMENT)
-        private readonly env: IAppEnvironment,
-        private readonly _activatedRoute: ActivatedRoute) {
+        private readonly telemetryHubService: TelemetryHubService,
+        private readonly activatedRoute: ActivatedRoute) {
     }
 
     ngOnInit(): void {
-        const routeSnapshot = this._activatedRoute.snapshot;
-        this.deviceSummary = routeSnapshot.data['device'];
+        const routeSnapshot = this.activatedRoute.snapshot;
+        this.device = routeSnapshot.data['device'];
 
         this.telemetryLogs$ = this.telemetrySub$
             .pipe(
@@ -71,33 +69,19 @@ export class DeviceTelemetryPage implements OnInit, OnDestroy {
                 })),
             );
 
-        const { negotiateEndpoint } = this.env.pgotchiSignalR;
+        this.telemetryHubConnection = this.telemetryHubService.getConnection(this.device.userId);
 
-        this.signalRHubConnection = new signalR.HubConnectionBuilder()
-            .withUrl(negotiateEndpoint, {
-                headers: { 'x-user-id': this.deviceSummary.userId },
-                transport: signalR.HttpTransportType.WebSockets,
-            })
-            .build();
+        this.telemetryHubConnection.on("sendTelemetry", (args) => {
+            console.log("Received data:", args);
+            this.telemetrySub$.next(args);
+        });
 
-        this.signalRHubConnection.on("newMessage", data => {
-            console.log(data);
-            data.$timestamp = new Date().getSeconds();
-            this.telemetrySub$.next(data);
-        })
-
-        this.signalRHubConnection
-            .start()
-            .then(() => console.log("SignalR connection started"))
-            .catch(err => console.error("SignalR connection failed.", err));
+        this.telemetryHubConnection.start();
     }
 
     ngOnDestroy(): void {
-        this.signalRHubConnection
-            .stop()
-            .then(() => console.log("SignalR connection stopped"))
-
         this.telemetrySub$.unsubscribe();
+        this.telemetryHubConnection.stop();
     }
 }
 
