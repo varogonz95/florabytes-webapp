@@ -16,6 +16,7 @@ enum SetupSteps {
     ScanDevices,
     ConnectDevice,
     NetworkSetup,
+    WaitingConnection,
     EditDeviceInfo,
     Completed,
     Error,

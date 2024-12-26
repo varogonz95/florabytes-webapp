@@ -42,6 +42,11 @@
                                     (submit)="submitWifiCredentials()">
                                 </app-network-setup-step>
                             }
+                            @case (SetupSteps.WaitingConnection) {
+                                <app-device-connection-step
+                                    [deviceId]="deviceInfo.Id">
+                                </app-device-connection-step>
+                            }
                             @case (SetupSteps.EditDeviceInfo) {
                                 <app-device-info-step
                                     [step]="stepsSequence[0]" 
