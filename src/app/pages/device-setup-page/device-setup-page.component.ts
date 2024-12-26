@@ -1,11 +1,11 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { APP_ENVIRONMENT } from '../../../core/providers/app-environment.provider';
-import { IAppEnvironment } from '../../../core/providers/app-environment';
+import { BehaviorSubject, Observable, Subject, firstValueFrom, of } from 'rxjs';
+import { IAppEnvironment } from '../../providers/app-environment';
+import { APP_ENVIRONMENT } from '../../providers/app-environment.provider';
 import { PgotchiHttpClientService, RegisterDeviceRequest } from '../../services/pgotchi-httpclient/pgotchi-http-client.service';
-import { firstValueFrom } from 'rxjs';
+// import { TelemetryHubService } from '../../services/telemetry-hub/telemetry-hub.service';
 
 const MaxRetries = 10;
-const RetryInterval = 3000;
 
 // Service and Characteristic UUIDs aliases can be found here:
 // https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/modules/bluetooth/bluetooth_uuid.cc
@@ -27,20 +27,43 @@ export interface WifiCredentials {
     Password?: string
 }
 
-export interface DeviceInfo extends WifiCredentials {
-    DeviceId: string
+export interface DeviceInfo {
+    Id: string
     Name: string
     Description?: string
     DeviceLocation?: string
     AvatarImgUrl?: string
 }
 
+export class DeviceInfoClass implements DeviceInfo {
+    Id: string;
+    Name: string;
+    Description?: string | undefined;
+    DeviceLocation?: string | undefined;
+    AvatarImgUrl?: string | undefined;
+
+    constructor()
+    constructor(id: string, name: string)
+    constructor(id?: string, name?: string) {
+        this.Id = id ?? '';
+        this.Name = name ?? '';
+    }
+
+    public toObservable(): Observable<DeviceInfo> {
+        return of(this);
+    }
+}
+
 const DefaultDeviceInfo: DeviceInfo = {
-    DeviceId: '',
+    Id: '',
     Name: '',
     DeviceLocation: '',
     AvatarImgUrl: 'https://placehold.co/128x128?text=No+Avatar',
-    Ssid: ''
+}
+
+const DefaultWifiCredentials: WifiCredentials = {
+    Ssid: '',
+    Password: '',
 }
 
 @Component({
@@ -49,22 +72,28 @@ const DefaultDeviceInfo: DeviceInfo = {
     styleUrl: './device-setup-page.component.css',
 })
 export class DeviceSetupPage implements OnInit {
-    public isConnecting = false;
-    public isScanning = false;
-    public stepsSequence = [SetupSteps.ScanDevices];
     public SetupSteps = SetupSteps;
-    public deviceInfo: DeviceInfo;
+    public deviceInfo = DefaultDeviceInfo;
+    public wifiCredentials = DefaultWifiCredentials;
+    
+    public isPairing$ = new BehaviorSubject(false);
+    public stepsSequence$ = new BehaviorSubject(SetupSteps.ScanDevices);
+    
     public connectionFailedError?: Error;
-    public deviceName: string = null!;
     public retryCount = 0;
 
     private characteristic: BluetoothRemoteGATTCharacteristic = null!;
+    private readonly deviceInfoChanges$ = new Subject<Partial<DeviceInfo>>();
 
     constructor(
         @Inject(APP_ENVIRONMENT)
         private readonly env: IAppEnvironment,
         private readonly pgotchiHttpClient: PgotchiHttpClientService) {
-        this.deviceInfo = DefaultDeviceInfo;
+
+        this.deviceInfoChanges$
+            .subscribe(changes =>
+                Object.keys(changes)
+                    .forEach(key => this.deviceInfo[key] = changes[key]));
     }
 
     ngOnInit(): void {
@@ -72,7 +101,7 @@ export class DeviceSetupPage implements OnInit {
             navigator.bluetooth.getAvailability()
                 .then(isBluetoothAvailable => {
                     if (!isBluetoothAvailable) {
-                        this.stepsSequence = [SetupSteps.Error];
+                        this.stepsSequence$.next(SetupSteps.Error);
                     }
                 })
                 .catch();
@@ -80,28 +109,28 @@ export class DeviceSetupPage implements OnInit {
 
     public async scanAndPairDevice() {
         try {
-            this.isScanning = true;
-            const device = await this.selectDevice();
-            this.deviceName = device.name ?? device.id;
-            this.isScanning = false;
+            // Start scanning for FloraByte devices
+            this.isPairing$.next(true);
+            const bleDevice = await this.selectDevice();
 
-            this.isConnecting = true;
-            const gattService = await this.connectToGattService(device);
+            // Once found and selected, then set values accordingly
+            this.deviceInfoChanges$.next({ Name: bleDevice.name ?? bleDevice.id });
+            this.isPairing$.next(false);
+
+            const gattService = await this.connectToGattService(bleDevice);
             this.characteristic = await gattService.getCharacteristic(UserControlPointUuid);
 
             const staticValue = await this.characteristic.readValue();
-            this.deviceInfo.Name = device.name ?? device.id;
-            this.deviceInfo.DeviceId = Buffer.from(staticValue.buffer).toString('utf8');
-            this.isConnecting = false;
+            const deviceId = Buffer.from(staticValue.buffer).toString('utf8');
+            this.deviceInfoChanges$.next({ Id: deviceId });
 
-            this.stepsSequence.unshift(SetupSteps.NetworkSetup);
+            this.stepsSequence$.next(SetupSteps.NetworkSetup);
         }
         catch (reason) {
             console.log(reason);
         }
         finally {
-            this.isConnecting = false;
-            this.isScanning = false;
+            this.isPairing$.next(false);
         }
     }
 
@@ -126,60 +155,44 @@ export class DeviceSetupPage implements OnInit {
             throw new Error("GATT not available.");
 
         this.retryCount = 0;
-        let gattServer: BluetoothRemoteGATTServer = null!;
-        let gattService: BluetoothRemoteGATTService = null!;
 
-        await new Promise((resolve, reject) => {
-            const intervalId = setInterval(async () => {
-                if (this.retryCount < MaxRetries) {
-                    try {
-                        gattServer = await device.gatt!.connect();
-                        gattService = await gattServer.getPrimaryService(UserDataServiceUuid);
-                        clearInterval(intervalId);
-                        resolve(gattService);
-                    }
-                    catch (err) {
-                        this.retryCount++;
-                        console.log(`Could not connect to primary service. Retry ${this.retryCount} of ${MaxRetries}...`);
-                    }
+        while (true) {
+            if (this.retryCount < MaxRetries) {
+                try {
+                    const gattServer = await device.gatt!.connect();
+                    console.log(gattServer);
+                    const gattService = await gattServer.getPrimaryService(UserDataServiceUuid);
+                    return gattService;
                 }
-                else {
-                    const error = new Error("Could not connect to GATT Server.");
-                    this.connectionFailedError = error;
-                    clearInterval(intervalId);
-                    reject(error);
+                catch (err) {
+                    this.retryCount++;
+                    console.log(`Could not connect to primary service. Retry ${this.retryCount} of ${MaxRetries}...`);
+                    console.log("Error", err);
                 }
-            }, RetryInterval);
-        })
-
-        if (!gattServer?.connected) {
-            throw new Error("Could not connect to GATT Server.");
+            }
+            else {
+                throw new Error("Could not connect to GATT Server.");
+            }
         }
-
-        if (!gattService) {
-            throw new Error(`Could not get primary service {${UserDataServiceUuid}}.`);
-        }
-
-        return gattService;
     }
 
     public async submitWifiCredentials() {
         if (!this.characteristic)
             throw new Error("GATT Write Characteristic cannot be null.");
 
-        const { Ssid, Password } = this.deviceInfo
+        const { Ssid, Password } = this.wifiCredentials;
         const wifiCredentials = JSON.stringify({ Ssid, Password });
         const buffer = Buffer.from(wifiCredentials);
 
-        await this.characteristic.writeValueWithResponse(buffer);
-        this.characteristic.service.device.gatt?.disconnect();
+        await this.characteristic.writeValue(buffer);
+        // this.characteristic.service.device.gatt?.disconnect();
 
-        this.stepsSequence.unshift(SetupSteps.EditDeviceInfo);
+        this.stepsSequence$.next(SetupSteps.WaitingConnection);
     }
 
     public async submitDeviceInfo() {
         const request: RegisterDeviceRequest = {
-            deviceId: this.deviceInfo.DeviceId,
+            deviceId: this.deviceInfo.Id,
             properties: {
                 "name": this.deviceInfo.Name,
                 "description": this.deviceInfo.Description,
@@ -190,10 +203,10 @@ export class DeviceSetupPage implements OnInit {
         const summary = await firstValueFrom(this.pgotchiHttpClient.registerDevice(request));
         console.log(summary);
 
-        this.stepsSequence.unshift(SetupSteps.Completed);
+        this.stepsSequence$.next(SetupSteps.Completed);
     }
 
     public goBack() {
-        this.stepsSequence.shift();
+        // this.stepsSequence$.shift();
     }
 }

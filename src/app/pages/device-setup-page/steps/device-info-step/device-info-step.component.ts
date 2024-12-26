@@ -9,7 +9,6 @@ import { DeviceInfo } from '../../device-setup-page.component';
     styleUrl: './device-info-step.component.css'
 })
 export class DeviceInfoStepComponent {
-    @Input({ required: true }) public step = 0;
     @Input() public model: DeviceInfo = null!;
 
     @Output() public modelChange = new EventEmitter<DeviceInfo>();

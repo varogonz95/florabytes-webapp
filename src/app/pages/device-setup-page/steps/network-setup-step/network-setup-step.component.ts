@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { DeviceInfo } from '../../device-setup-page.component';
+import { WifiCredentials } from '../../device-setup-page.component';
 
 @Component({
     selector: 'app-network-setup-step',
@@ -8,10 +8,10 @@ import { DeviceInfo } from '../../device-setup-page.component';
 })
 export class NetworkSetupStepComponent {
     @Input()
-    public model: DeviceInfo = null!;
+    public wifi: WifiCredentials = null!;
 
     @Output()
-    public modelChange = new EventEmitter<DeviceInfo>();
+    public modelChange = new EventEmitter<WifiCredentials>();
 
     @Output()
     public submit = new EventEmitter();
