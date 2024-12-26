@@ -24,13 +24,11 @@
                     <div class="card-content">
                         @switch (stepsSequence[0]) {
                             @case (SetupSteps.ScanDevices) {
-                                <app-scan-devices-step 
-                                    [deviceName]="deviceName"
-                                    [retryCount]="retryCount"
+                                <app-pair-device-step 
+                                    [device]="deviceInfo"
                                     (requestScan)="scanAndPairDevice()"
-                                    [isScanning]="isScanning"
-                                    [isConnecting]="isConnecting">
-                                </app-scan-devices-step>
+                                    [isPairing]="(isPairing$ | async) ?? false">
+                                </app-pair-device-step>
                                 
                                 @if (connectionFailedError) {
                                     <app-message [type]="'danger'">{{connectionFailedError.message}}</app-message>

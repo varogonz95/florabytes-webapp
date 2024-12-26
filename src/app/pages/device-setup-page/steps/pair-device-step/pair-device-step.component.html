@@ -1,0 +1,17 @@
+<h5 class="subtitle">Step 1.</h5>
+<h3 class="title">Pair a new device.</h3>
+
+<p *ngIf="isPairing" class="has-text-centered">
+    Pairing with {{device.Name}}...<br/>
+    <small class="has-text-light">You can change the this device later :)</small>
+</p>
+
+<div class="has-text-right">
+    <button 
+        class="button is-link"
+        [ngClass]="{'is-loading is-disabled': isPairing}"
+        [disabled]="isPairing"
+        (click)="requestScanHandler()">
+        Scan
+    </button>
+</div>
