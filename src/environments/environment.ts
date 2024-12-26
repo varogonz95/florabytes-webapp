@@ -1,7 +1,15 @@
-import { IAppEnvironment } from "../core/providers/app-environment";
+import { IAppEnvironment } from "../app/providers/app-environment";
 
 export const environment: IAppEnvironment = {
     bypassBluetoothAdapterCheck: false,
+    firebase: {
+        apiKey: "",
+        authDomain: "",
+        projectId: "",
+        storageBucket: "",
+        messagingSenderId: "",
+        appId: "",
+    },
     pgotchiHttpClient: {
         baseAddress: "",
     },
@@ -9,7 +17,7 @@ export const environment: IAppEnvironment = {
         baseAddress: "",
         apiKey: "",
     },
-    pgotchiIotHub: {
+    iotHub: {
         hostName: "",
         port: 8883,
         eventHub: {
@@ -20,5 +28,5 @@ export const environment: IAppEnvironment = {
     },
     pgotchiSignalR: {
         negotiateEndpoint: "",
-    },
+    }
 };
