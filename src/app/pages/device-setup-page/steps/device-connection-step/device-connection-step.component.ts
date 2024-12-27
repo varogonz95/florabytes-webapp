@@ -20,14 +20,14 @@ export class DeviceConnectionStepComponent {
     private checkDeviceConnection() {
         return timer(0, 5000)
             .pipe(
-                switchMap(() => this.pgotchiHttpClient.getDeviceById(this.deviceId)),
+                switchMap(() => this.pgotchiHttpClient.getConnectionState(this.deviceId)),
                 retry({
                     delay: (error, retryCount) =>
                         iif(() => retryCount >= 10 || error.status !== 404, of(error), timer(1000))
                             .pipe(tap(() => console.log(`Retrying connection check... Retry ${retryCount} of ${10}`)))
                 }),
-                tap(device => {
-                    if (device.connectionState.toLowerCase() === "connected") {
+                tap(resp => {
+                    if (resp.connectionState.toLowerCase() === "connected") {
                         console.log("Device connected!");
                         // Optionally emit a value or complete the observable here
                     }
@@ -35,7 +35,7 @@ export class DeviceConnectionStepComponent {
                         console.log("Device not connected yet...");
                     }
                 }),
-                map(deviceSummary => deviceSummary.connectionState),
+                map(resp => resp.connectionState),
                 startWith("Checking connection...")
             );
     }

@@ -10,14 +10,19 @@ export interface RegisterDeviceRequest {
     properties?: Record<string, any>
 }
 
+export interface ConnectionStateResponse {
+    connectionState: string;
+}
+
 @Injectable({
     providedIn: 'root',
 })
 export class PgotchiHttpClientService {
     public readonly baseAddress: string;
-    private getDevicesUrl = () => `${this.baseAddress}/Device`;
-    private getDeviceByIdUrl = (deviceId: string) => `${this.getDevicesUrl()}/${deviceId}`;
-    private getRegisterDeviceUrl = () => `${this.baseAddress}/Device`;
+    private listDevicesUrl = () => `${this.baseAddress}/Device`;
+    private getDeviceUrl = (deviceId: string) => `${this.listDevicesUrl()}/${deviceId}`;
+    private getConnectionStateUrl = (deviceId: string) => `${this.baseAddress}/Device/${deviceId}/connection-state`;
+    private createDeviceUrl = () => `${this.baseAddress}/Device`;
 
     constructor(
         private readonly httpClient: HttpClient,
@@ -26,17 +31,17 @@ export class PgotchiHttpClientService {
         this.baseAddress = env.pgotchiHttpClient.baseAddress;
     }
 
-    public getDevices() {
+    public listDevices() {
         return this.httpClient
-            .get(this.getDevicesUrl())
+            .get(this.listDevicesUrl())
             .pipe(
                 map(response => response as DeviceSummary[])
             );
     }
 
-    public getDeviceById(deviceId: string) {
+    public getDeviceId(deviceId: string) {
         return this.httpClient
-            .get(this.getDeviceByIdUrl(deviceId))
+            .get(this.getDeviceUrl(deviceId))
             .pipe(
                 catchError((err, caught) => {
                     console.error(err, caught);
@@ -46,9 +51,21 @@ export class PgotchiHttpClientService {
             );
     }
 
-    public registerDevice(request: RegisterDeviceRequest) {
+    public getConnectionState(deviceId: string) {
         return this.httpClient
-            .post(this.getRegisterDeviceUrl(), request)
+            .get(this.getConnectionStateUrl(deviceId))
+            .pipe(
+                catchError((err, caught) => {
+                    console.error(err, caught);
+                    return throwError(() => err)
+                }),
+                map(response => response as ConnectionStateResponse)
+            );
+    }
+
+    public createDevice(request: RegisterDeviceRequest) {
+        return this.httpClient
+            .post(this.createDeviceUrl(), request)
             .pipe(
                 catchError((err, caught) => {
                     console.error(err, caught);

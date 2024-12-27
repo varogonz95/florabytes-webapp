@@ -23,7 +23,7 @@ export class DeviceListPage implements OnInit {
 
     private fetchDevices() {
         this.$devices = this._pgotchiService
-            .getDevices()
+            .listDevices()
             .pipe(
                 catchError((error, _caught) => {
                     this.errors.push(error);

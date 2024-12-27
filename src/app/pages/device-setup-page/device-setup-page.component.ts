@@ -200,7 +200,7 @@ export class DeviceSetupPage implements OnInit {
                 "avatarImgUrl": this.deviceInfo.AvatarImgUrl,
             }
         }
-        const summary = await firstValueFrom(this.pgotchiHttpClient.registerDevice(request));
+        const summary = await firstValueFrom(this.pgotchiHttpClient.createDevice(request));
         console.log(summary);
 
         this.stepsSequence$.next(SetupSteps.Completed);
