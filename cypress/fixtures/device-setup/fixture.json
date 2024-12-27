@@ -1,0 +1,9 @@
+{
+    "deviceInfo": {
+        "id": "test-device-1"
+    },
+    "wifiCredentials": {
+        "ssid": "my-wifi-network",
+        "password": "a-$tR0nG_P4$$w0rD"
+    }
+}
