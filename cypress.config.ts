@@ -1,9 +1,18 @@
-import { defineConfig } from "cypress";
-import { DeviceMock, WebBluetoothMock } from "web-bluetooth-mock";
+import { defineConfig } from 'cypress'
 
 export default defineConfig({
-    e2e: {
-        setupNodeEvents(on, config) {
-        },
+  
+  e2e: {
+    'baseUrl': 'http://localhost:4200'
+  },
+  
+  
+  component: {
+    devServer: {
+      framework: 'angular',
+      bundler: 'webpack',
     },
-});
+    specPattern: '**/*.cy.ts'
+  }
+  
+})

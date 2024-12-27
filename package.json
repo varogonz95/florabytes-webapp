@@ -6,7 +6,11 @@
     "start": "ng serve --host=127.0.0.1",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "e2e": "ng e2e --headless --spec \"cypress/e2e/**/*.cy.ts\"",
+    "e2e:cy": "concurrently \"ng s\" \"wait-on http-get://localhost:4200 && cypress run --e2e --headed --no-exit --browser electron\" --kill-others --success first",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
   },
   "private": true,
   "dependencies": {
@@ -39,12 +43,14 @@
     "@angular-devkit/build-angular": "^18.0.5",
     "@angular/cli": "^18.0.5",
     "@angular/compiler-cli": "^18.0.4",
+    "@cypress/schematic": "^2.5.2",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^20.14.2",
     "@types/w3c-web-hid": "^1.0.6",
     "@types/w3c-web-serial": "^1.0.6",
     "@types/w3c-web-usb": "^1.0.10",
     "@types/web-bluetooth": "^0.0.20",
+    "concurrently": "^9.1.0",
     "cypress": "^13.17.0",
     "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",
@@ -53,6 +59,7 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.4.2",
+    "wait-on": "^8.0.1",
     "web-bluetooth-mock": "^1.2.0"
   }
 }

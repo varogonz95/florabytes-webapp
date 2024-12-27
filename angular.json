@@ -108,11 +108,62 @@
                         "scripts": [],
                         "karmaConfig": "karma.conf.js"
                     }
+                },
+                "cypress-run": {
+                    "builder": "@cypress/schematic:cypress",
+                    "options": {
+                        "devServerTarget": "FloraBytes.WebApp:serve",
+                        "configFile": ".//cypress.config.js"
+                    },
+                    "configurations": {
+                        "production": {
+                            "devServerTarget": "FloraBytes.WebApp:serve:production"
+                        }
+                    }
+                },
+                "cypress-open": {
+                    "builder": "@cypress/schematic:cypress",
+                    "options": {
+                        "watch": true,
+                        "headless": false,
+                        "configFile": ".//cypress.config.js"
+                    }
+                },
+                "ct": {
+                    "builder": "@cypress/schematic:cypress",
+                    "options": {
+                        "devServerTarget": "FloraBytes.WebApp:serve",
+                        "watch": true,
+                        "headless": false,
+                        "testingType": "component"
+                    },
+                    "configurations": {
+                        "development": {
+                            "devServerTarget": "FloraBytes.WebApp:serve:development"
+                        }
+                    }
+                },
+                "e2e": {
+                    "builder": "@cypress/schematic:cypress",
+                    "options": {
+                        "devServerTarget": "FloraBytes.WebApp:serve",
+                        "watch": true,
+                        "headless": false
+                    },
+                    "configurations": {
+                        "production": {
+                            "devServerTarget": "FloraBytes.WebApp:serve:production"
+                        }
+                    }
                 }
             }
         }
     },
     "cli": {
-      "analytics": false
+        "analytics": false,
+        "schematicCollections": [
+            "@cypress/schematic",
+            "@schematics/angular"
+        ]
     }
 }
