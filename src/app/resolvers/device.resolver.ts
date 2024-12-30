@@ -7,5 +7,5 @@ import { PgotchiHttpClientService } from '../services/pgotchi-httpclient/pgotchi
 export const deviceResolver: ResolveFn<DeviceSummary> = (route, _state) => {
     const deviceId = route.paramMap.get(routeParams.deviceId)!;
     const pgotchiHttpClient = inject(PgotchiHttpClientService);
-    return pgotchiHttpClient.getDeviceId(deviceId)
+    return pgotchiHttpClient.getDevice(deviceId)
 };

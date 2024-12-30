@@ -1,28 +1,51 @@
 import { DeviceMock } from "web-bluetooth-mock";
 
-describe('template spec', () => {
-    it('passes', () => {
-        cy.fixture('device-setup/fixture').then(fixture => {
-            const { deviceInfo, wifiCredentials } = fixture;
+const Stubs = {
+    getDevice: 'getDeviceReq',
+    getConnectionState: 'getConnectionStateReq',
+}
+type StubRef = {
+    [k in keyof typeof Stubs]: `@${k}`;
+};
 
-            cy.intercept('GET', `http://localhost:5173/Device/${deviceInfo.id}/connection-state`, { connectionState: 'Connected' });
+const stubRef: StubRef = Object.keys(Stubs).map(key => ({ [key]: `@${Stubs[key]}` })).reduce((prev, curr) => ({ ...prev, ...curr })) as StubRef;
+console.log(stubRef);
 
-            cy.visit('http://localhost:4200/devices/setup', {
-                onBeforeLoad(win) {
-                    cy.stub(win.navigator.bluetooth, 'getAvailability')
-                        .returns(Promise.resolve(true));
+describe('Device setup', () => {
+    beforeEach(() => {
+    });
 
-                    cy.stub(win.navigator.bluetooth, 'requestDevice')
-                        .returns(Promise.resolve(new DeviceMock("my-device", [0x18C1])));
-                },
+    it('should add a new device', () => {
+        cy.fixture('device-setup/fixture')
+            .then(fixture => {
+                const { deviceInfo, wifiCredentials } = fixture;
+
+                cy.intercept(
+                    'GET', `http://localhost:5173/Device/*`,
+                    {
+                        statusCode: 200,
+                        body: { connectionState: 'Connected' }
+                    })
+                    .as(Stubs.getDevice);
+
+                cy.visit('http://localhost:4200/devices/setup', {
+                    onBeforeLoad(win) {
+                        cy.stub(win.navigator.bluetooth, 'getAvailability')
+                            .returns(Promise.resolve(true));
+
+                        cy.stub(win.navigator.bluetooth, 'requestDevice')
+                            .returns(Promise.resolve(new DeviceMock("my-device", [0x18C1])));
+                    },
+                });
+
+                completeDeviceScanStep();
+                completeNetworkStep(wifiCredentials);
+
+                cy.wait(stubRef.getDevice);
             });
 
-            completeDeviceScanStep();
-            completeNetworkStep(wifiCredentials);
-        });
-
-    })
-})
+    });
+});
 
 function completeDeviceScanStep() {
     cy.get('#scan-btn').click();

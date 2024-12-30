@@ -39,7 +39,7 @@ export class PgotchiHttpClientService {
             );
     }
 
-    public getDeviceId(deviceId: string) {
+    public getDevice(deviceId: string) {
         return this.httpClient
             .get(this.getDeviceUrl(deviceId))
             .pipe(

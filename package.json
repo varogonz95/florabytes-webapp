@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "e2e": "ng e2e --headless --spec \"cypress/e2e/**/*.cy.ts\"",
-    "e2e:cy": "concurrently \"ng s\" \"wait-on http-get://localhost:4200 && cypress run --e2e --headed --no-exit --browser electron\" --kill-others --success first",
+    "e2e:cy": "concurrently \"ng s --watch false\" \"wait-on http-get://localhost:4200 && cypress run --e2e --headed --no-exit --browser electron\" --kill-others --success first",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run"
   },

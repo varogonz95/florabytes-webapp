@@ -160,7 +160,6 @@ export class DeviceSetupPage implements OnInit {
             if (this.retryCount < MaxRetries) {
                 try {
                     const gattServer = await device.gatt!.connect();
-                    console.log(gattServer);
                     const gattService = await gattServer.getPrimaryService(UserDataServiceUuid);
                     return gattService;
                 }

@@ -1,6 +1,8 @@
 import { Component, Input } from '@angular/core';
-import { Observable, iif, map, of, retry, startWith, switchMap, tap, timer } from 'rxjs';
+import { Observable, catchError, map, of, retry, startWith } from 'rxjs';
 import { PgotchiHttpClientService } from '../../../../services/pgotchi-httpclient/pgotchi-http-client.service';
+
+const MaxRetries = 5;
 
 @Component({
     selector: 'app-device-connection-step',
@@ -10,7 +12,6 @@ import { PgotchiHttpClientService } from '../../../../services/pgotchi-httpclien
 export class DeviceConnectionStepComponent {
     @Input({ required: true })
     public deviceId!: string;
-
     public connectionState$: Observable<string>;
 
     constructor(private readonly pgotchiHttpClient: PgotchiHttpClientService) {
@@ -18,25 +19,12 @@ export class DeviceConnectionStepComponent {
     }
 
     private checkDeviceConnection() {
-        return timer(0, 5000)
+        return this.pgotchiHttpClient.getDevice(this.deviceId)
             .pipe(
-                switchMap(() => this.pgotchiHttpClient.getConnectionState(this.deviceId)),
-                retry({
-                    delay: (error, retryCount) =>
-                        iif(() => retryCount >= 10 || error.status !== 404, of(error), timer(1000))
-                            .pipe(tap(() => console.log(`Retrying connection check... Retry ${retryCount} of ${10}`)))
-                }),
-                tap(resp => {
-                    if (resp.connectionState.toLowerCase() === "connected") {
-                        console.log("Device connected!");
-                        // Optionally emit a value or complete the observable here
-                    }
-                    else {
-                        console.log("Device not connected yet...");
-                    }
-                }),
-                map(resp => resp.connectionState),
-                startWith("Checking connection...")
+                map(device => device.connectionState),
+                startWith("Checking connection..."),
+                retry({ delay: 3000, count: MaxRetries, }),
+                catchError(() => of("Timed out checking connection."))
             );
     }
 }
