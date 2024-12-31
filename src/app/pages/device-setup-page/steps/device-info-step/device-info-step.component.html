@@ -17,20 +17,6 @@
         </div>
     </div>
 
-    <!-- <div class="file is-justify-content-center">
-        <label class="file-label">
-            <input class="file-input" type="file" name="avatarImg" [(ngModel)]="model.AvatarImgUrl" />
-            @if(!model.AvatarImgUrl?.trim()) {
-                <span class="file-cta">
-                    <span class="file-label"> Choose a file… </span>
-                </span>
-            }
-            @else {
-                <span class="file-name">{{model.AvatarImgUrl}}</span>
-            }
-        </label>
-    </div> -->
-
     <div class="field">
         <label for="" class="label">Device Name</label>
         <div class="control">
@@ -45,13 +31,13 @@
         </div>
     </div>
 
-    <div class="columns">
+    <!-- <div class="columns">
         <div class="field column">
             <label for="" class="label">Location</label>
             <div class="select">
                 <select name="location" [(ngModel)]="model.DeviceLocation">
                     <option value="" selected disabled>-Select a location-</option>
-                    <!-- <option value="new">+ Add new location</option> -->
+                    <option value="new">+ Add new location</option>
                     <option value="Bedroom">Bedroom</option>
                     <option value="Living Room">Living Room</option>
                     <option value="Kitchen">Kitchen</option>
@@ -60,15 +46,15 @@
                 </select>
             </div>
         </div>
-        <!-- @if (model.DeviceLocation === 'new') {
+        @if (model.DeviceLocation === 'new') {
             <div class="field column">
                 <label for="" class="label">&nbsp;</label>
                 <div class="control">
                     <input type="text" class="input" name="location" placeholder="New location" [(ngModel)]="newDeviceLocation" />
                 </div>
             </div>
-        } -->
-    </div>
+        }
+    </div> -->
 
     <div class="field">
         <div class="control">

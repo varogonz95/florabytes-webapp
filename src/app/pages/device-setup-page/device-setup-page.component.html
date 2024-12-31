@@ -42,7 +42,8 @@
                             }
                             @case (SetupSteps.WaitingConnection) {
                                 <app-device-connection-step
-                                    [deviceId]="deviceInfo.Id">
+                                    [deviceId]="deviceInfo.Id"
+                                    (onContinueClick)="stepsSequence$.next(SetupSteps.EditDeviceInfo)">
                                 </app-device-connection-step>
                             }
                             @case (SetupSteps.EditDeviceInfo) {

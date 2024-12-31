@@ -23,8 +23,9 @@ describe('Device setup', () => {
                 cy.intercept(
                     'GET', `http://localhost:5173/Device/*`,
                     {
+                        delay: 2000,
                         statusCode: 200,
-                        body: { connectionState: 'Connected' }
+                        body: { connectionState: 'Connected' },
                     })
                     .as(Stubs.getDevice);
 
@@ -42,6 +43,8 @@ describe('Device setup', () => {
                 completeNetworkStep(wifiCredentials);
 
                 cy.wait(stubRef.getDevice);
+
+                cy.get('[data-id=connectivity-btn]').click();
             });
 
     });
@@ -52,9 +55,12 @@ function completeDeviceScanStep() {
 }
 
 function completeNetworkStep(wifiCredentials: any) {
-    cy.get('#network-setup-form input[name=ssid]')
-        .type(wifiCredentials.ssid);
-    cy.get('#network-setup-form input[name=pwd]')
-        .type(wifiCredentials.password);
-    cy.get('#submit-credentials-btn').click();
+    cy.get('#network-setup-form')
+        .within(_ => {
+            cy.get('input[name=ssid]')
+                .type(wifiCredentials.ssid);
+            cy.get('input[name=pwd]')
+                .type(wifiCredentials.password);
+            cy.root().submit();
+        });
 }

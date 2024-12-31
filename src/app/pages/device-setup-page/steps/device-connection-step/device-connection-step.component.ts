@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Observable, catchError, map, of, retry, startWith } from 'rxjs';
 import { PgotchiHttpClientService } from '../../../../services/pgotchi-httpclient/pgotchi-http-client.service';
 
@@ -10,12 +10,20 @@ const MaxRetries = 5;
     styleUrl: './device-connection-step.component.css'
 })
 export class DeviceConnectionStepComponent {
+    
     @Input({ required: true })
     public deviceId!: string;
     public connectionState$: Observable<string>;
 
+    @Output('onContinueClick')
+    public onContinueClick$ = new EventEmitter();
+    
     constructor(private readonly pgotchiHttpClient: PgotchiHttpClientService) {
         this.connectionState$ = this.checkDeviceConnection();
+    }
+
+    public emitContinueClick() {
+        this.onContinueClick$.emit();
     }
 
     private checkDeviceConnection() {
