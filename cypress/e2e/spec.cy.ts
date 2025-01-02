@@ -1,8 +1,10 @@
+import fixture from "../fixtures/device-setup/fixture.json";
 import { DeviceMock } from "web-bluetooth-mock";
 
 const Stubs = {
     getDevice: 'getDeviceReq',
     getConnectionState: 'getConnectionStateReq',
+    createDevice: 'createDeviceReq',
 }
 type StubRef = {
     [k in keyof typeof Stubs]: `@${k}`;
@@ -11,44 +13,52 @@ type StubRef = {
 const stubRef: StubRef = Object.keys(Stubs).map(key => ({ [key]: `@${Stubs[key]}` })).reduce((prev, curr) => ({ ...prev, ...curr })) as StubRef;
 console.log(stubRef);
 
-describe('Device setup', () => {
-    beforeEach(() => {
-    });
+context('Add new Device', () => {
+    describe('Happy path', () => {
+        const { deviceInfo, wifiCredentials } = fixture;
 
-    it('should add a new device', () => {
-        cy.fixture('device-setup/fixture')
-            .then(fixture => {
-                const { deviceInfo, wifiCredentials } = fixture;
+        before(() => {
+            visitPage(deviceInfo);
+        });
 
-                cy.intercept(
-                    'GET', `http://localhost:5173/Device/*`,
-                    {
-                        delay: 2000,
-                        statusCode: 200,
-                        body: { connectionState: 'Connected' },
-                    })
-                    .as(Stubs.getDevice);
+        it('should add a new device', () => {
+            addInterceptors(deviceInfo);
 
-                cy.visit('http://localhost:4200/devices/setup', {
-                    onBeforeLoad(win) {
-                        cy.stub(win.navigator.bluetooth, 'getAvailability')
-                            .returns(Promise.resolve(true));
-
-                        cy.stub(win.navigator.bluetooth, 'requestDevice')
-                            .returns(Promise.resolve(new DeviceMock("my-device", [0x18C1])));
-                    },
-                });
-
-                completeDeviceScanStep();
-                completeNetworkStep(wifiCredentials);
-
-                cy.wait(stubRef.getDevice);
-
-                cy.get('[data-id=connectivity-btn]').click();
-            });
-
+            completeDeviceScanStep();
+            completeNetworkStep(wifiCredentials);
+            completeDeviceConnection();
+            completeDeviceInfo(deviceInfo);
+        });
     });
 });
+
+function addInterceptors(deviceInfo: any) {
+    cy.intercept(
+        'GET', `http://localhost:5173/Device/*`,
+        {
+            delay: 2000,
+            statusCode: 200,
+            body: deviceInfo,
+        })
+        .as(Stubs.getDevice);
+
+    cy.intercept(
+        'POST', `http://localhost:5173/Device`,
+        { statusCode: 200, })
+        .as(Stubs.createDevice);
+}
+
+function visitPage(deviceInfo: any) {
+    cy.visit('http://localhost:4200/devices/setup', {
+        onBeforeLoad(win) {
+            cy.stub(win.navigator.bluetooth, 'getAvailability')
+                .returns(Promise.resolve(true));
+
+            cy.stub(win.navigator.bluetooth, 'requestDevice')
+                .returns(Promise.resolve(new DeviceMock(deviceInfo.name, ['user_data', 'user_control_point'])));
+        },
+    });
+}
 
 function completeDeviceScanStep() {
     cy.get('#scan-btn').click();
@@ -63,4 +73,23 @@ function completeNetworkStep(wifiCredentials: any) {
                 .type(wifiCredentials.password);
             cy.root().submit();
         });
+}
+
+function completeDeviceConnection() {
+    cy.wait(stubRef.getDevice);
+    cy.get('[data-id=connectivity-btn]').click();
+}
+
+function completeDeviceInfo(deviceInfo: any) {
+    cy.get('#device-info-form')
+        .within(_ => {
+            cy.get('input[name=deviceName]')
+                .clear()
+                .type(deviceInfo.name);
+            cy.get('input[name=deviceDescription]')
+                .clear()
+                .type(deviceInfo.description);
+            // cy.root().submit();
+        })
+        .wait(stubRef.createDevice);
 }

@@ -1,6 +1,9 @@
 {
     "deviceInfo": {
-        "id": "test-device-1"
+        "id": "test-device-1",
+        "name": "Test Device 1",
+        "description": "This is a test device",
+        "connectionState": "connected"
     },
     "wifiCredentials": {
         "ssid": "my-wifi-network",
