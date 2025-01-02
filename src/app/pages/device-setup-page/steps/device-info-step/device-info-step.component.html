@@ -1,64 +1,92 @@
-<form #deviceInfoForm="ngForm" autocomplete="off">
-    <h5 class="subtitle">Step 3.</h5>
-    <h3 class="title">Identify your device.</h3>
+<form #deviceInfoForm="ngForm" id="device-info-form" autocomplete="off" (ngSubmit)="submit.emit()">
+    <h3 class="title">Plant information.</h3>
 
     <div class="field is-flex is-justify-content-center">
         <figure class="image is-rounded is-128x128">
-            <img class="is-rounded"
-                [src]="model.AvatarImgUrl"
-                alt="No avatar image" />
+            <img class="is-rounded" [src]="model.avatarImgUrl" alt="No avatar image" />
         </figure>
     </div>
 
     <div class="field has-text-centered">
         <div class="control">
-            <input type="hidden" name="avatarImgUrl" [(ngModel)]="model.AvatarImgUrl" />
+            <input type="hidden" name="avatarImgUrl" [(ngModel)]="model.avatarImgUrl" />
             <button type="button" class="button is-small" (click)="showImageSelector()">Change avatar</button>
         </div>
     </div>
 
     <div class="field">
-        <label for="" class="label">Device Name</label>
+        <label for="" class="label">Give your plant a name</label>
         <div class="control">
-            <input name="deviceName" type="text" class="input" [(ngModel)]="model.Name" required />
+            <input name="deviceName" type="text" class="input" [(ngModel)]="model.name" required />
         </div>
     </div>
 
     <div class="field">
-        <label for="" class="label">Short description</label>
+        <label for="" class="label">Optionally, give some details</label>
         <div class="control">
-            <input type="text" class="input" name="deviceDescription" [(ngModel)]="model.Description" />
+            <input type="text" class="input" name="deviceDescription" [(ngModel)]="model.description" />
         </div>
     </div>
 
-    <!-- <div class="columns">
+    <div class="field">
+        <label for="" class="label">I have this plant since</label>
+        <div class="columns">
+            <div class="field column">
+            <label for="sinceMonth">(Month)</label>
+            <div class="control">
+                <div class="select">
+                <select id="sinceMonth" name="sinceMonth" [(ngModel)]="model.sinceMonth" required>
+                    <option value="" selected disabled>-Select month-</option>
+                    <option value="jan">January</option>
+                    <option value="feb">February</option>
+                    <option value="mar">March</option>
+                    <option value="apr">April</option>
+                    <option value="may">May</option>
+                    <option value="jun">June</option>
+                    <option value="jul">July</option>
+                    <option value="aug">August</option>
+                    <option value="sep">September</option>
+                    <option value="oct">October</option>
+                    <option value="nov">November</option>
+                    <option value="dec">December</option>
+                </select>
+                </div>
+            </div>
+            </div>
+            <div class="field column">
+            <label for="sinceYear">(Year)</label>
+            <div class="control">
+                <input id="sinceYear" type="number" class="input" name="sinceYear" [(ngModel)]="model.sinceYear" [min]="0" [max]="year" required />
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="columns">
         <div class="field column">
-            <label for="" class="label">Location</label>
+            <label for="" class="label">Where this plant is placed?</label>
             <div class="select">
-                <select name="location" [(ngModel)]="model.DeviceLocation">
+                <select name="location" [(ngModel)]="model.location">
                     <option value="" selected disabled>-Select a location-</option>
-                    <option value="new">+ Add new location</option>
-                    <option value="Bedroom">Bedroom</option>
-                    <option value="Living Room">Living Room</option>
-                    <option value="Kitchen">Kitchen</option>
-                    <option value="Bathroom">Bathroom</option>
-                    <option value="Other">Other</option>
+                    <option value="outdoors">Outdoors</option>
+                    <option value="indoors">Indoors</option>
+                    <option value="other">Other</option>
                 </select>
             </div>
         </div>
-        @if (model.DeviceLocation === 'new') {
-            <div class="field column">
-                <label for="" class="label">&nbsp;</label>
-                <div class="control">
-                    <input type="text" class="input" name="location" placeholder="New location" [(ngModel)]="newDeviceLocation" />
-                </div>
+        @if (model.location === 'other') {
+        <div class="field column">
+            <label for="" class="label">&nbsp;</label>
+            <div class="control">
+                <input type="text" class="input" name="location" placeholder="Other location" [(ngModel)]="newDeviceLocation" />
             </div>
+        </div>
         }
-    </div> -->
+    </div>
 
     <div class="field">
         <div class="control">
-            <button type="button" class="button is-link" [disabled]="!deviceInfoForm.valid" (click)="submitHandler()">Finalize</button>
+            <button type="submit" class="button is-link" [disabled]="!deviceInfoForm.valid">Finalize</button>
         </div>
     </div>
 </form>

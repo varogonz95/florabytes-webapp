@@ -1,8 +1,8 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { BehaviorSubject, Observable, Subject, firstValueFrom, of } from 'rxjs';
+import { BehaviorSubject, Subject, firstValueFrom } from 'rxjs';
 import { IAppEnvironment } from '../../providers/app-environment';
 import { APP_ENVIRONMENT } from '../../providers/app-environment.provider';
-import { PgotchiHttpClientService, RegisterDeviceRequest } from '../../services/pgotchi-httpclient/pgotchi-http-client.service';
+import { PgotchiHttpClientService } from '../../services/pgotchi-httpclient/pgotchi-http-client.service';
 // import { TelemetryHubService } from '../../services/telemetry-hub/telemetry-hub.service';
 
 const MaxRetries = 10;
@@ -23,62 +23,48 @@ enum SetupSteps {
 }
 
 export interface WifiCredentials {
-    Ssid: string
-    Password?: string
+    ssid: string
+    password?: string
 }
+
+const today = new Date();
 
 export interface DeviceInfo {
-    Id: string
-    Name: string
-    Description?: string
-    DeviceLocation?: string
-    AvatarImgUrl?: string
-}
-
-export class DeviceInfoClass implements DeviceInfo {
-    Id: string;
-    Name: string;
-    Description?: string | undefined;
-    DeviceLocation?: string | undefined;
-    AvatarImgUrl?: string | undefined;
-
-    constructor()
-    constructor(id: string, name: string)
-    constructor(id?: string, name?: string) {
-        this.Id = id ?? '';
-        this.Name = name ?? '';
-    }
-
-    public toObservable(): Observable<DeviceInfo> {
-        return of(this);
-    }
+    id: string
+    name: string
+    description?: string
+    avatarImgUrl?: string
+    location?: string
+    sinceMonth?: string;
+    sinceYear?: number;
 }
 
 const DefaultDeviceInfo: DeviceInfo = {
-    Id: '',
-    Name: '',
-    DeviceLocation: '',
-    AvatarImgUrl: 'https://placehold.co/128x128?text=No+Avatar',
+    id: '',
+    name: '',
+    location: '',
+    sinceMonth: today.toLocaleString('default', { month: 'short' }),
+    sinceYear: today.getFullYear(),
+    avatarImgUrl: 'https://placehold.co/128x128?text=No+Avatar',
 }
 
 const DefaultWifiCredentials: WifiCredentials = {
-    Ssid: '',
-    Password: '',
+    ssid: '',
+    password: '',
 }
 
 @Component({
     selector: 'app-device-setup-page',
     templateUrl: './device-setup-page.component.html',
-    styleUrl: './device-setup-page.component.css',
 })
 export class DeviceSetupPage implements OnInit {
     public SetupSteps = SetupSteps;
     public deviceInfo = DefaultDeviceInfo;
     public wifiCredentials = DefaultWifiCredentials;
-    
+
     public isPairing$ = new BehaviorSubject(false);
     public stepsSequence$ = new BehaviorSubject(SetupSteps.ScanDevices);
-    
+
     public connectionFailedError?: Error;
     public retryCount = 0;
 
@@ -114,7 +100,7 @@ export class DeviceSetupPage implements OnInit {
             const bleDevice = await this.selectDevice();
 
             // Once found and selected, then set values accordingly
-            this.deviceInfoChanges$.next({ Name: bleDevice.name ?? bleDevice.id });
+            this.deviceInfoChanges$.next({ name: bleDevice.name ?? bleDevice.id });
             this.isPairing$.next(false);
 
             const gattService = await this.connectToGattService(bleDevice);
@@ -122,7 +108,7 @@ export class DeviceSetupPage implements OnInit {
 
             const staticValue = await this.characteristic.readValue();
             const deviceId = Buffer.from(staticValue.buffer).toString('utf8');
-            this.deviceInfoChanges$.next({ Id: deviceId });
+            this.deviceInfoChanges$.next({ id: deviceId });
 
             this.stepsSequence$.next(SetupSteps.NetworkSetup);
         }
@@ -179,28 +165,18 @@ export class DeviceSetupPage implements OnInit {
         if (!this.characteristic)
             throw new Error("GATT Write Characteristic cannot be null.");
 
-        const { Ssid, Password } = this.wifiCredentials;
-        const wifiCredentials = JSON.stringify({ Ssid, Password });
+        const wifiCredentials = JSON.stringify(this.wifiCredentials);
         const buffer = Buffer.from(wifiCredentials);
-
         await this.characteristic.writeValue(buffer);
-        // this.characteristic.service.device.gatt?.disconnect();
+
+        this.characteristic.service.device.gatt?.disconnect();
 
         this.stepsSequence$.next(SetupSteps.WaitingConnection);
     }
 
     public async submitDeviceInfo() {
-        const request: RegisterDeviceRequest = {
-            deviceId: this.deviceInfo.Id,
-            properties: {
-                "name": this.deviceInfo.Name,
-                "description": this.deviceInfo.Description,
-                "location": this.deviceInfo.DeviceLocation,
-                "avatarImgUrl": this.deviceInfo.AvatarImgUrl,
-            }
-        }
-        const summary = await firstValueFrom(this.pgotchiHttpClient.createDevice(request));
-        console.log(summary);
+        const { id: deviceId, ...properties } = this.deviceInfo;
+        await firstValueFrom(this.pgotchiHttpClient.createDevice({ deviceId, properties }));
 
         this.stepsSequence$.next(SetupSteps.Completed);
     }

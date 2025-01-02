@@ -1,31 +1,10 @@
-<p>{{ connectionState$ | async }}</p>
-<!-- <hr />
-<details open>
-    <summary>
-        <h3 class="title">FloraBytes Device Info</h3>
-    </summary>
-    <p>
-        <strong><small>Name</small></strong>
-        <br />
-        Hello world
-    </p>
-    <p>
-        <strong><small>Description</small></strong>
-        <br />
-        Hello world
-    </p>
-    <p>
-        <strong><small>Description</small></strong>
-        <br />
-        Hello world
-    </p>
-</details> -->
+<h1 class="title">Checking device connectivity...</h1>
 
-<nav class="level">
-    <div class="level-left"></div>
-    <div class="level-right">
-        <div class="level-item">
-            <button data-id="connectivity-btn" class="button is-link" [disabled]="(connectionState$ | async | lowercase) !== 'connected'" (click)="emitContinueClick()">Continue</button>
-        </div>
-    </div>
-</nav>
+<button 
+    data-id="connectivity-btn"
+    class="button is-link"
+    [ngClass]="{'is-loading': isLoading}"
+    [disabled]="isLoading"
+    (click)="emitContinueClick()">
+    Continue
+</button>

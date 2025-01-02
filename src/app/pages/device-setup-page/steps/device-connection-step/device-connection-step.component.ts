@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Observable, catchError, map, of, retry, startWith } from 'rxjs';
+import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
+import { Subscription, map, retry } from 'rxjs';
 import { PgotchiHttpClientService } from '../../../../services/pgotchi-httpclient/pgotchi-http-client.service';
 
 const MaxRetries = 5;
@@ -7,32 +7,38 @@ const MaxRetries = 5;
 @Component({
     selector: 'app-device-connection-step',
     templateUrl: './device-connection-step.component.html',
-    styleUrl: './device-connection-step.component.css'
 })
-export class DeviceConnectionStepComponent {
-    
+export class DeviceConnectionStepComponent implements OnDestroy{
+
     @Input({ required: true })
     public deviceId!: string;
-    public connectionState$: Observable<string>;
+    public isLoading = true;
+
+    private connectionStateSub: Subscription;
 
     @Output('onContinueClick')
     public onContinueClick$ = new EventEmitter();
-    
-    constructor(private readonly pgotchiHttpClient: PgotchiHttpClientService) {
-        this.connectionState$ = this.checkDeviceConnection();
-    }
 
+    constructor(private readonly pgotchiHttpClient: PgotchiHttpClientService) {
+        this.connectionStateSub = this.checkDeviceConnection()
+            .subscribe(state => {
+                this.isLoading = state.toLowerCase() !== "connected";
+            });
+    }
+    
     public emitContinueClick() {
         this.onContinueClick$.emit();
     }
-
+    
     private checkDeviceConnection() {
         return this.pgotchiHttpClient.getDevice(this.deviceId)
-            .pipe(
-                map(device => device.connectionState),
-                startWith("Checking connection..."),
-                retry({ delay: 3000, count: MaxRetries, }),
-                catchError(() => of("Timed out checking connection."))
-            );
+        .pipe(
+            map(device => device.connectionState),
+            retry({ delay: 3000, count: MaxRetries, })
+        );
+    }
+
+    ngOnDestroy(): void {
+        this.connectionStateSub.unsubscribe();
     }
 }

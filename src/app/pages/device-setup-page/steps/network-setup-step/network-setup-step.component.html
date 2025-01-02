@@ -1,19 +1,18 @@
 <!-- <form (ngSubmit)="submitHandler()"> -->
 <form id="network-setup-form">
-    <h5 class="subtitle">Step 2.</h5>
     <h3 class="title">Config your local network.</h3>
 
     <div class="field">
         <label for="ssid-inp" class="label">Network SSID</label>
         <div class="control">
-            <input id="ssid-inp" type="text" class="input" name="ssid" [(ngModel)]="wifi.Ssid" />
+            <input id="ssid-inp" type="text" class="input" name="ssid" [(ngModel)]="wifi.ssid" />
         </div>
     </div>
 
     <div class="field">
         <label for="pwd-inp" class="label">Password</label>
         <div class="control">
-            <input id="pwd-inp" type="password" class="input" name="pwd" [(ngModel)]="wifi.Password" />
+            <input id="pwd-inp" type="password" class="input" name="pwd" [(ngModel)]="wifi.password" />
         </div>
     </div>
 

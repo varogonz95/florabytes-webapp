@@ -42,7 +42,7 @@
                             }
                             @case (SetupSteps.WaitingConnection) {
                                 <app-device-connection-step
-                                    [deviceId]="deviceInfo.Id"
+                                    [deviceId]="deviceInfo.id"
                                     (onContinueClick)="stepsSequence$.next(SetupSteps.EditDeviceInfo)">
                                 </app-device-connection-step>
                             }
@@ -53,7 +53,7 @@
                                 </app-device-info-step>
                             }
                             @case (SetupSteps.Completed) {
-                                <app-completed-step [deviceId]="deviceInfo.Id"></app-completed-step>
+                                <app-completed-step [deviceId]="deviceInfo.id"></app-completed-step>
                             }
                             @case (SetupSteps.Error) {
                                 <h3 class="title">Woops! :(</h3>

@@ -4,7 +4,6 @@ import { WifiCredentials } from '../../device-setup-page.component';
 @Component({
     selector: 'app-network-setup-step',
     templateUrl: './network-setup-step.component.html',
-    styleUrl: './network-setup-step.component.css'
 })
 export class NetworkSetupStepComponent {
     @Input()
