@@ -8,19 +8,6 @@
         <div class="columns is-centered is-multiline">
             <div class="column is-half">
                 <article class="card">
-                    <!-- @if (
-                        stepsSequence.length > 1 &&
-                        [SetupSteps.Completed, SetupSteps.Error].includes(stepsSequence[0])
-                    ) {
-                        <header class="card-header is-shadowless">
-                            <button class="card-header-icon" type="button" aria-label="more options" (click)="goBack()">
-                                <span class="icon">
-                                    <i class="fas fa-angle-down" aria-hidden="true"></i>
-                                </span>
-                            </button>
-                        </header>
-                    } -->
-                    
                     <div class="card-content">
                         @switch (stepsSequence$ | async) {
                             @case (SetupSteps.ScanDevices) {

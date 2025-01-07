@@ -1,8 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { BehaviorSubject, Subject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { IAppEnvironment } from '../../providers/app-environment';
 import { APP_ENVIRONMENT } from '../../providers/app-environment.provider';
-import { PgotchiHttpClientService } from '../../services/pgotchi-httpclient/pgotchi-http-client.service';
 
 // Service and Characteristic UUIDs aliases can be found here:
 // https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/modules/bluetooth/bluetooth_uuid.cc
@@ -69,8 +68,7 @@ export class DeviceSetupPage implements OnInit {
 
     constructor(
         @Inject(APP_ENVIRONMENT)
-        private readonly env: IAppEnvironment,
-        private readonly pgotchiHttpClient: PgotchiHttpClientService) {
+        private readonly env: IAppEnvironment) {
 
         this.deviceInfoChanges$
             .subscribe(changes =>
@@ -168,16 +166,5 @@ export class DeviceSetupPage implements OnInit {
         this.characteristic.service.device.gatt?.disconnect();
 
         this.stepsSequence$.next(SetupSteps.WaitingConnection);
-    }
-
-    public async submitDeviceInfo() {
-        const { deviceId: deviceId, ...properties } = this.plantInfo;
-        await firstValueFrom(this.pgotchiHttpClient.createDevice({ deviceId, properties }));
-
-        this.stepsSequence$.next(SetupSteps.AssignPlant);
-    }
-
-    public goBack() {
-        // this.stepsSequence$.shift();
     }
 }
