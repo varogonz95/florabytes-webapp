@@ -1,8 +1,8 @@
 <section class="section">
     <div class="container">
-        <header class="block has-text-centered mb-6">
-            <h1 class="title is-1">Setup New Device</h1>
-            <h2 class="subtitle">Complete the steps below to setup your FloraBytes device 🌱</h2>
+        <header class="has-text-centered mb-6">
+            <h1 class="title is-1">Add a new Device</h1>
+            <h2 class="subtitle">Connect your FloraBytes to your network.</h2>
         </header>
 
         <div class="columns is-centered is-multiline">
@@ -25,8 +25,8 @@
                         @switch (stepsSequence$ | async) {
                             @case (SetupSteps.ScanDevices) {
                                 <app-pair-device-step 
-                                    [device]="deviceInfo"
-                                    (requestScan)="scanAndPairDevice()"
+                                    [device]="plantInfo"
+                                    (onScanRequested)="scanAndPairDevice()"
                                     [isPairing]="(isPairing$ | async) ?? false">
                                 </app-pair-device-step>
                                 
@@ -37,30 +37,23 @@
                             @case (SetupSteps.NetworkSetup) {
                                 <app-network-setup-step 
                                     [wifi]="wifiCredentials"
-                                    (submit)="submitWifiCredentials()">
+                                    (onSubmit)="submitWifiCredentials()">
                                 </app-network-setup-step>
                             }
                             @case (SetupSteps.WaitingConnection) {
                                 <app-device-connection-step
-                                    [deviceId]="deviceInfo.id"
-                                    (onContinueClick)="stepsSequence$.next(SetupSteps.EditDeviceInfo)">
+                                    [deviceId]="plantInfo.deviceId"
+                                    (onClickContinue)="stepsSequence$.next(SetupSteps.SetupCompleted)">
                                 </app-device-connection-step>
                             }
-                            @case (SetupSteps.EditDeviceInfo) {
-                                <app-device-info-step
-                                    [model]="deviceInfo" 
-                                    (submit)="submitDeviceInfo()">
-                                </app-device-info-step>
-                            }
-                            @case (SetupSteps.Completed) {
-                                <app-completed-step [deviceId]="deviceInfo.id"></app-completed-step>
+                            @case (SetupSteps.SetupCompleted) {
+                                <app-completed-step [deviceId]="plantInfo.deviceId"></app-completed-step>
                             }
                             @case (SetupSteps.Error) {
                                 <h3 class="title">Woops! :(</h3>
                                 <div class="content">
                                     <p>
-                                        Looks like your current device does not have a Bluetooth adapter.
-                                        <br>
+                                        Looks like your current device does not have a Bluetooth adapter.<br />
                                         Please enable Bluetooth in your device settings.
                                     </p>
                                 </div>

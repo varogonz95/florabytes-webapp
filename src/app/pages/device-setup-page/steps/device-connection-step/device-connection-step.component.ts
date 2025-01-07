@@ -8,34 +8,31 @@ const MaxRetries = 5;
     selector: 'app-device-connection-step',
     templateUrl: './device-connection-step.component.html',
 })
-export class DeviceConnectionStepComponent implements OnDestroy{
+export class DeviceConnectionStepComponent implements OnDestroy {
+    @Input({ required: true }) public deviceId!: string;
+    
+    @Output() public onClickContinue = new EventEmitter();
 
-    @Input({ required: true })
-    public deviceId!: string;
     public isLoading = true;
 
     private connectionStateSub: Subscription;
 
-    @Output('onContinueClick')
-    public onContinueClick$ = new EventEmitter();
-
     constructor(private readonly pgotchiHttpClient: PgotchiHttpClientService) {
-        this.connectionStateSub = this.checkDeviceConnection()
-            .subscribe(state => {
-                this.isLoading = state.toLowerCase() !== "connected";
-            });
+        this.connectionStateSub =
+            this.checkDeviceConnection()
+                .subscribe(state => this.isLoading = state.toLowerCase() !== "connected");
     }
-    
+
     public emitContinueClick() {
-        this.onContinueClick$.emit();
+        this.onClickContinue.emit();
     }
-    
+
     private checkDeviceConnection() {
         return this.pgotchiHttpClient.getDevice(this.deviceId)
-        .pipe(
-            map(device => device.connectionState),
-            retry({ delay: 3000, count: MaxRetries, })
-        );
+            .pipe(
+                map(device => device.connectionState),
+                retry({ delay: 3000, count: MaxRetries, })
+            );
     }
 
     ngOnDestroy(): void {

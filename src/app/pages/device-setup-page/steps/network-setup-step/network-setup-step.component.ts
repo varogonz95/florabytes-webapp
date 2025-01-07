@@ -6,16 +6,8 @@ import { WifiCredentials } from '../../device-setup-page.component';
     templateUrl: './network-setup-step.component.html',
 })
 export class NetworkSetupStepComponent {
-    @Input()
-    public wifi: WifiCredentials = null!;
+    @Input() public wifi: WifiCredentials = null!;
 
-    @Output()
-    public modelChange = new EventEmitter<WifiCredentials>();
-
-    @Output()
-    public submit = new EventEmitter();
-
-    public submitHandler() {
-        this.submit.emit();
-    }
+    @Output() public modelChange = new EventEmitter<WifiCredentials>();
+    @Output() public onSubmit = new EventEmitter();
 }

@@ -1,6 +1,16 @@
-<!-- <form (ngSubmit)="submitHandler()"> -->
-<form id="network-setup-form">
-    <h3 class="title">Config your local network.</h3>
+<form id="network-setup-form" class="form" (submit)="onSubmit.emit()">
+    <h3 class="title">
+        Connect to your local network.
+    </h3>
+
+    <div class="content">
+        <p>
+            <small>
+                Don't worry, credentials won't travel the Internet. <br />
+                Your data goes directly to your FloraBytes device :)
+            </small>
+        </p>
+    </div>
 
     <div class="field">
         <label for="ssid-inp" class="label">Network SSID</label>
@@ -18,7 +28,7 @@
 
     <div class="field">
         <div class="control">
-            <button id="submit-credentials-btn" type="button" class="button is-link" (click)="submitHandler()">Connect</button>
+            <button id="submit-credentials-btn" type="submit" class="button is-link">Connect</button>
         </div>
     </div>
 </form>

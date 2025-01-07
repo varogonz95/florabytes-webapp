@@ -1,16 +1,16 @@
 import { Component, EventEmitter, Input, Output, ViewContainerRef } from '@angular/core';
 import { ImageSelection, ImageSelectorInputs } from '../../../../components/image-selector/image-selector.component';
 import { ImageSelectorService } from '../../../../services/image-selector/image-selector.service';
-import { DeviceInfo } from '../../device-setup-page.component';
+import { PlantInfo } from '../../device-setup-page.component';
 
 @Component({
-    selector: 'app-device-info-step',
-    templateUrl: './device-info-step.component.html',
+    selector: 'app-assign-plant-step',
+    templateUrl: './assign-plant-step.component.html',
 })
 export class DeviceInfoStepComponent {
-    @Input() public model: DeviceInfo = null!;
+    @Input() public model: PlantInfo = null!;
 
-    @Output() public modelChange = new EventEmitter<DeviceInfo>();
+    @Output() public modelChange = new EventEmitter<PlantInfo>();
     @Output() public submit = new EventEmitter();
 
     public newDeviceLocation?: string;

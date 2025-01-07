@@ -3,22 +3,20 @@ import { BehaviorSubject, Subject, firstValueFrom } from 'rxjs';
 import { IAppEnvironment } from '../../providers/app-environment';
 import { APP_ENVIRONMENT } from '../../providers/app-environment.provider';
 import { PgotchiHttpClientService } from '../../services/pgotchi-httpclient/pgotchi-http-client.service';
-// import { TelemetryHubService } from '../../services/telemetry-hub/telemetry-hub.service';
-
-const MaxRetries = 10;
 
 // Service and Characteristic UUIDs aliases can be found here:
 // https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/modules/bluetooth/bluetooth_uuid.cc
 const UserDataServiceUuid = /* "0742a8ea-396a-4947-9962-f2fab085854a" */ 'user_data'; // UUID: 0x181C
 const UserControlPointUuid = /* "0742a8ea-396a-4947-9962-f2fab085854f" */ 'user_control_point'; // UUID: 0x2A9F
+const MaxRetries = 10;
+const today = new Date();
 
 enum SetupSteps {
     ScanDevices,
     ConnectDevice,
     NetworkSetup,
     WaitingConnection,
-    EditDeviceInfo,
-    Completed,
+    SetupCompleted,
     Error,
 }
 
@@ -27,23 +25,21 @@ export interface WifiCredentials {
     password?: string
 }
 
-const today = new Date();
-
-export interface DeviceInfo {
-    id: string
+export interface PlantInfo {
+    deviceId: string
     name: string
     description?: string
     avatarImgUrl?: string
     location?: string
-    sinceMonth?: string;
+    sinceMonth?: number;
     sinceYear?: number;
 }
 
-const DefaultDeviceInfo: DeviceInfo = {
-    id: '',
+const DefaultPlantInfo: PlantInfo = {
+    deviceId: '',
     name: '',
     location: '',
-    sinceMonth: today.toLocaleString('default', { month: 'short' }),
+    sinceMonth: today.getMonth(),
     sinceYear: today.getFullYear(),
     avatarImgUrl: 'https://placehold.co/128x128?text=No+Avatar',
 }
@@ -59,7 +55,7 @@ const DefaultWifiCredentials: WifiCredentials = {
 })
 export class DeviceSetupPage implements OnInit {
     public SetupSteps = SetupSteps;
-    public deviceInfo = DefaultDeviceInfo;
+    public plantInfo = DefaultPlantInfo;
     public wifiCredentials = DefaultWifiCredentials;
 
     public isPairing$ = new BehaviorSubject(false);
@@ -69,7 +65,7 @@ export class DeviceSetupPage implements OnInit {
     public retryCount = 0;
 
     private characteristic: BluetoothRemoteGATTCharacteristic = null!;
-    private readonly deviceInfoChanges$ = new Subject<Partial<DeviceInfo>>();
+    private readonly deviceInfoChanges$ = new Subject<Partial<PlantInfo>>();
 
     constructor(
         @Inject(APP_ENVIRONMENT)
@@ -79,7 +75,7 @@ export class DeviceSetupPage implements OnInit {
         this.deviceInfoChanges$
             .subscribe(changes =>
                 Object.keys(changes)
-                    .forEach(key => this.deviceInfo[key] = changes[key]));
+                    .forEach(key => this.plantInfo[key] = changes[key]));
     }
 
     ngOnInit(): void {
@@ -108,7 +104,7 @@ export class DeviceSetupPage implements OnInit {
 
             const staticValue = await this.characteristic.readValue();
             const deviceId = Buffer.from(staticValue.buffer).toString('utf8');
-            this.deviceInfoChanges$.next({ id: deviceId });
+            this.deviceInfoChanges$.next({ deviceId: deviceId });
 
             this.stepsSequence$.next(SetupSteps.NetworkSetup);
         }
@@ -175,10 +171,10 @@ export class DeviceSetupPage implements OnInit {
     }
 
     public async submitDeviceInfo() {
-        const { id: deviceId, ...properties } = this.deviceInfo;
+        const { deviceId: deviceId, ...properties } = this.plantInfo;
         await firstValueFrom(this.pgotchiHttpClient.createDevice({ deviceId, properties }));
 
-        this.stepsSequence$.next(SetupSteps.Completed);
+        this.stepsSequence$.next(SetupSteps.AssignPlant);
     }
 
     public goBack() {

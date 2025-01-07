@@ -10,7 +10,7 @@ import { ImageSelectorService }             from '../../services/image-selector/
 import { DeviceSetupPage }                  from './device-setup-page.component';
 import { CompletedStepComponent }           from './steps/completed-step/completed-step.component';
 import { DeviceConnectionStepComponent }    from './steps/device-connection-step/device-connection-step.component';
-import { DeviceInfoStepComponent }          from './steps/device-info-step/device-info-step.component';
+import { DeviceInfoStepComponent }          from './steps/assign-plant-step/assign-plant-step.component';
 import { NetworkSetupStepComponent }        from './steps/network-setup-step/network-setup-step.component';
 import { PairDeviceStepComponent }         from './steps/pair-device-step/pair-device-step.component';
 
