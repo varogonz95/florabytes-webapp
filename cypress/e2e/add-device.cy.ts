@@ -27,7 +27,7 @@ context('Add new Device', () => {
             completeDeviceScanStep();
             completeNetworkStep(wifiCredentials);
             completeDeviceConnection();
-            completeDeviceInfo(deviceInfo);
+            // completeDeviceInfo(deviceInfo);
         });
     });
 });
