@@ -1,5 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { getDefaultPlantInfo, PlantInfo } from '../../models/plant-info';
 import { IAppEnvironment } from '../../providers/app-environment';
 import { APP_ENVIRONMENT } from '../../providers/app-environment.provider';
 
@@ -8,7 +9,6 @@ import { APP_ENVIRONMENT } from '../../providers/app-environment.provider';
 const UserDataServiceUuid = /* "0742a8ea-396a-4947-9962-f2fab085854a" */ 'user_data'; // UUID: 0x181C
 const UserControlPointUuid = /* "0742a8ea-396a-4947-9962-f2fab085854f" */ 'user_control_point'; // UUID: 0x2A9F
 const MaxRetries = 10;
-const today = new Date();
 
 enum SetupSteps {
     ScanDevices,
@@ -24,25 +24,6 @@ export interface WifiCredentials {
     password?: string
 }
 
-export interface PlantInfo {
-    deviceId: string
-    name: string
-    description?: string
-    avatarImgUrl?: string
-    location?: string
-    sinceMonth?: number;
-    sinceYear?: number;
-}
-
-const DefaultPlantInfo: PlantInfo = {
-    deviceId: '',
-    name: '',
-    location: '',
-    sinceMonth: today.getMonth(),
-    sinceYear: today.getFullYear(),
-    avatarImgUrl: 'https://placehold.co/128x128?text=No+Avatar',
-}
-
 const DefaultWifiCredentials: WifiCredentials = {
     ssid: '',
     password: '',
@@ -54,7 +35,7 @@ const DefaultWifiCredentials: WifiCredentials = {
 })
 export class DeviceSetupPage implements OnInit {
     public SetupSteps = SetupSteps;
-    public plantInfo = DefaultPlantInfo;
+    public plantInfo = getDefaultPlantInfo();
     public wifiCredentials = DefaultWifiCredentials;
 
     public isPairing$ = new BehaviorSubject(false);

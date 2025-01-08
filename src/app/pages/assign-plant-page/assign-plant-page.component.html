@@ -1,1 +1,94 @@
-<p>assign-plant-page works!</p>
+<form #deviceInfoForm="ngForm" id="device-info-form" autocomplete="off" (ngSubmit)="onSubmit()">
+    <h3 class="title">Plant information.</h3>
+    <h5 class="subtitle">Tell us more about your plant.</h5>
+
+    <!-- <div class="field is-flex is-justify-content-center">
+        <figure class="image is-rounded is-128x128">
+            <img class="is-rounded" [src]="device.avatarImgUrl" alt="No avatar image" />
+        </figure>
+    </div>
+
+    <div class="field has-text-centered">
+        <div class="control">
+            <input type="hidden" name="avatarImgUrl" [(ngModel)]="device.avatarImgUrl" />
+            <button type="button" class="button is-small" (click)="showImageSelector()">Change avatar</button>
+        </div>
+    </div> -->
+
+    <div class="field">
+        <label for="" class="label">What's your plant's name?</label>
+        <div class="control">
+            <input name="deviceName" type="text" class="input" [(ngModel)]="plantInfo.name" required />
+        </div>
+    </div>
+
+    <div class="field">
+        <label for="" class="label">Any fun facts about your plant?</label>
+        <div class="control">
+            <input type="text" class="input" name="deviceDescription" [(ngModel)]="plantInfo.description" />
+        </div>
+    </div>
+
+    <div class="field">
+        <label for="" class="label">When did you adopt this plant?</label>
+        <div class="columns">
+            <div class="field column">
+                <label for="sinceMonth">(Month)</label>
+                <div class="control">
+                    <div class="select">
+                        <select id="sinceMonth" name="sinceMonth" [(ngModel)]="plantInfo.sinceMonth">
+                            <option value="" selected disabled>-Select month-</option>
+                            <option value="0">January</option>
+                            <option value="1">February</option>
+                            <option value="2">March</option>
+                            <option value="3">April</option>
+                            <option value="4">May</option>
+                            <option value="5">June</option>
+                            <option value="6">July</option>
+                            <option value="7">August</option>
+                            <option value="8">September</option>
+                            <option value="9">October</option>
+                            <option value="10">November</option>
+                            <option value="11">December</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="field column">
+                <label for="sinceYear">(Year)</label>
+                <div class="control">
+                    <input id="sinceYear" type="number" class="input" name="sinceYear" [(ngModel)]="plantInfo.sinceYear" [min]="0" [max]="maxYear" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="field">
+        <label for="" class="label">Where is your plant located?</label>
+    </div>
+    <div class="columns">
+        <div class="field column">
+            <div class="select">
+                <select name="location" [(ngModel)]="plantInfo.location">
+                    <option value="" selected disabled>-Select a location-</option>
+                    <option value="outdoors">Outdoors</option>
+                    <option value="indoors">Indoors</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+        </div>
+        <!-- @if (plantInfo.location === 'other') {
+            <div class="field column">
+                <div class="control">
+                    <input type="text" class="input" name="location" placeholder="Other location" [(ngModel)]="newDeviceLocation" />
+                </div>
+            </div>
+        } -->
+    </div>
+
+    <div class="field">
+        <div class="control">
+            <button type="submit" class="button is-link" [disabled]="!deviceInfoForm.valid">Submit</button>
+        </div>
+    </div>
+</form>

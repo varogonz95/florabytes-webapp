@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Inject, Input, Output } from '@angular/core';
 import { IAppEnvironment } from '../../../../providers/app-environment';
 import { APP_ENVIRONMENT } from '../../../../providers/app-environment.provider';
-import { PlantInfo } from '../../device-setup-page.component';
+import { PlantInfo } from '../../../../models/plant-info';
 
 @Component({
     selector: 'app-pair-device-step',
