@@ -1,5 +1,6 @@
 import fixture from "../fixtures/device-setup/fixture.json";
-import { DeviceMock } from "web-bluetooth-mock";
+import { CharacteristicMock, DeviceMock, GattMock, PrimaryServiceMock } from "web-bluetooth-mock";
+import { stringToBuffer } from "../support/utils";
 
 const Stubs = {
     getDevice: 'getDeviceReq',
@@ -49,15 +50,37 @@ function addInterceptors(deviceInfo: any) {
 }
 
 function visitPage(deviceInfo: any) {
-    cy.visit('http://localhost:4200/devices/setup', {
+    cy.visit('http://localhost:4200/device-setup', {
         onBeforeLoad(win) {
-            cy.stub(win.navigator.bluetooth, 'getAvailability')
-                .returns(Promise.resolve(true));
-
-            cy.stub(win.navigator.bluetooth, 'requestDevice')
-                .returns(Promise.resolve(new DeviceMock(deviceInfo.name, ['user_data', 'user_control_point'])));
+            stubWebBLEApi(win, deviceInfo);
         },
     });
+}
+
+function stubWebBLEApi(win: Cypress.AUTWindow, deviceInfo: any) {
+    cy.stub(win.navigator.bluetooth, 'getAvailability')
+        .returns(Promise.resolve(true));
+
+    const deviceMock = new DeviceMock(deviceInfo.name, ['user_data', 'user_control_point']);
+    const gattServerMock = new GattMock(deviceMock);
+    const gattServiceMock = new PrimaryServiceMock(deviceMock, 'user_data', true);
+    const gattCharacteristicMock = new CharacteristicMock(gattServiceMock, 'user_control_point');
+    const staticValue = stringToBuffer(deviceInfo.deviceId);
+
+    cy.stub(win.navigator.bluetooth, 'requestDevice')
+        .returns(Promise.resolve(deviceMock));
+
+    cy.stub(deviceMock.gatt, 'connect')
+        .returns(Promise.resolve(gattServerMock));
+
+    cy.stub(gattServerMock, 'getPrimaryService')
+        .returns(Promise.resolve(gattServiceMock));
+
+    cy.stub(gattServiceMock, 'getCharacteristic')
+        .returns(Promise.resolve(gattCharacteristicMock));
+
+    cy.stub(gattCharacteristicMock, 'readValue')
+        .returns(Promise.resolve(staticValue));
 }
 
 function completeDeviceScanStep() {
