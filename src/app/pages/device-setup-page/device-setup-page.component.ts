@@ -144,7 +144,7 @@ export class DeviceSetupPage implements OnInit {
         const buffer = Buffer.from(wifiCredentials);
         await this.characteristic.writeValue(buffer);
 
-        this.characteristic.service.device.gatt?.disconnect();
+        // this.characteristic.service.device.gatt?.disconnect();
 
         this.stepsSequence$.next(SetupSteps.WaitingConnection);
     }

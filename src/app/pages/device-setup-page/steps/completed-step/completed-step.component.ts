@@ -15,16 +15,22 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
             <a [routerLink]="['/', 'devices']" class="button">No, maybe later.</a>
         </div>
         <div class="control">
-            <button type="button" class="button is-link" (click)="onClickConfirmHandler()">Yes, let's assign a plant!</button>
+            @if (confirmRoute) {
+                <a class="button is-link" [routerLink]="confirmRoute">Yes, let's assign a plant!</a>
+            }
+            @else {
+                <button type="button" class="button is-link" (click)="onConfirmHandler()">Yes, let's assign a plant!</button>
+            }
         </div>
     </div>
     `,
 })
 export class CompletedStepComponent {
-    @Input({ required: true }) public deviceId!: string;
+    @Input() public confirmRoute!: string[];
+
     @Output() public onConfirm = new EventEmitter();
 
-    onClickConfirmHandler() {
+    onConfirmHandler() {
         this.onConfirm.emit();
     }
 }

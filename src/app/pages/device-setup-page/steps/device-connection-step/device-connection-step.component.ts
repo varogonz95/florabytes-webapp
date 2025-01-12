@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { Subscription, map, retry } from 'rxjs';
-import { PgotchiHttpClientService } from '../../../../services/pgotchi-httpclient/pgotchi-http-client.service';
+import { PgotchiClientService } from '../../../../services/pgotchi-client/pgotchi-client.service';
 
 const MaxRetries = 5;
 
@@ -17,7 +17,7 @@ export class DeviceConnectionStepComponent implements OnDestroy {
 
     private connectionStateSub: Subscription;
 
-    constructor(private readonly pgotchiHttpClient: PgotchiHttpClientService) {
+    constructor(private readonly pgotchiHttpClient: PgotchiClientService) {
         this.connectionStateSub =
             this.checkDeviceConnection()
                 .subscribe(state => this.isLoading = state.toLowerCase() !== "connected");

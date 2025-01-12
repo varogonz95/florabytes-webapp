@@ -1,12 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, catchError, finalize, throwError } from 'rxjs';
 import { DeviceTwinSummary } from '../../models/device-summary';
-import { PgotchiHttpClientService } from '../../services/pgotchi-httpclient/pgotchi-http-client.service';
+import { PgotchiClientService } from '../../services/pgotchi-client/pgotchi-client.service';
 
 @Component({
     selector: 'app-device-list',
     templateUrl: './device-list.component.html',
-    styleUrl: './device-list.component.css'
 })
 export class DeviceListPage implements OnInit {
 
@@ -14,7 +13,7 @@ export class DeviceListPage implements OnInit {
     public errors: Error[] = [];
     public $devices = new Observable<DeviceTwinSummary[]>();
 
-    constructor(private readonly _pgotchiService: PgotchiHttpClientService) {
+    constructor(private readonly _pgotchiService: PgotchiClientService) {
     }
 
     ngOnInit(): void {

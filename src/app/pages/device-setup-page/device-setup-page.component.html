@@ -34,7 +34,9 @@
                                 </app-device-connection-step>
                             }
                             @case (SetupSteps.SetupCompleted) {
-                                <app-completed-step [deviceId]="plantInfo.deviceId"></app-completed-step>
+                                <app-completed-step 
+                                    [confirmRoute]="['/devices', plantInfo.deviceId, 'assign-plant']">
+                                </app-completed-step>
                             }
                             @case (SetupSteps.Error) {
                                 <h3 class="title">Woops! :(</h3>

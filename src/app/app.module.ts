@@ -21,6 +21,7 @@ import { DeviceSetupPageModule } from './pages/device-setup-page/device-setup-pa
 import { DeviceTelemetryPage } from './pages/device-telemetry-page/device-telemetry-page.component';
 import { LoginPage } from './pages/login-page/login-page.component';
 import { AssignPlantPage } from './pages/assign-plant-page/assign-plant-page.component';
+import { PageNotFoundPage } from './pages/page-not-found-page/page-not-found-page.component';
 
 const PagesModules = [
     DeviceSetupPageModule
@@ -39,6 +40,7 @@ const StandaloneComponents = [
         DeviceTelemetryPage,
         LoginPage,
         AssignPlantPage,
+        PageNotFoundPage,
     ],
     imports: [
         BrowserModule,

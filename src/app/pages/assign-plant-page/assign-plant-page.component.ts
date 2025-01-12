@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRouteSnapshot } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { DeviceSummary } from '../../models/device-summary';
 import { getDefaultPlantInfo, PlantInfo } from '../../models/plant-info';
+import { PgotchiClientService } from '../../services/pgotchi-client/pgotchi-client.service';
 
 @Component({
     selector: 'app-assign-plant-page',
@@ -15,8 +16,10 @@ export class AssignPlantPage implements OnInit {
     public maxYear = this.today.getFullYear();
     public plantInfo: PlantInfo = getDefaultPlantInfo();
 
-    constructor(activatedRouteSnapshot: ActivatedRouteSnapshot) {
-        this.device = activatedRouteSnapshot.data['device'];
+    constructor(
+        activatedRoute: ActivatedRoute,
+        private readonly pgotchiClient: PgotchiClientService) {
+        this.device = activatedRoute.snapshot.data['device'];
     }
 
     ngOnInit(): void {
@@ -24,6 +27,9 @@ export class AssignPlantPage implements OnInit {
     }
 
     public onSubmit(): void {
-
+        this.pgotchiClient.updateDeviceProperties({
+            deviceId: this.device.id,
+            properties: { ...this.plantInfo },
+        });
     }
 }

@@ -14,10 +14,15 @@ export interface ConnectionStateResponse {
     connectionState: string;
 }
 
+export interface UpdateDevicePropertiesRequest {
+    deviceId: string;
+    properties: Record<string, any>;
+}
+
 @Injectable({
     providedIn: 'root',
 })
-export class PgotchiHttpClientService {
+export class PgotchiClientService {
     public readonly baseAddress: string;
     private listDevicesUrl = () => `${this.baseAddress}/Device`;
     private getDeviceUrl = (deviceId: string) => `${this.listDevicesUrl()}/${deviceId}`;
@@ -73,5 +78,9 @@ export class PgotchiHttpClientService {
                 }),
                 map(response => response as DeviceTwinSummary)
             );
+    }
+
+    public updateDeviceProperties(request: UpdateDevicePropertiesRequest) {
+        throw new Error('Method not implemented.');
     }
 }
