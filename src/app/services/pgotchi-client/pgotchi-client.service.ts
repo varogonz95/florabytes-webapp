@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Inject, Injectable } from '@angular/core';
+import { inject, Inject, Injectable } from '@angular/core';
 import { catchError, map, throwError } from 'rxjs';
 import { APP_ENVIRONMENT } from '../../providers/app-environment.provider';
 import { IAppEnvironment } from '../../providers/app-environment';
@@ -15,19 +15,32 @@ export interface ConnectionStateResponse {
 }
 
 export interface UpdateDevicePropertiesRequest {
-    deviceId: string;
+    eTag: string;
     properties: Record<string, any>;
 }
+
+function route(urlTemplate: string, ...args: string[]) {
+    const env = inject(APP_ENVIRONMENT);
+    if (!env) {
+        throw new Error('APP_ENVIRONMENT not provided');
+    }
+    const baseAddress = env.pgotchiHttpClient.baseAddress;
+    return `${baseAddress}/${args.reduce((prev, curr) => prev.replace('*', curr), urlTemplate)}`;
+}
+
+const Routes = {
+    CreateDevice: 'Device',
+    GetConnectionState: 'Device/*/connection-state',
+    GetDevice: 'Device/*',
+    ListDevices: 'Device',
+    UpdateDevice: 'Device/*',
+};
 
 @Injectable({
     providedIn: 'root',
 })
 export class PgotchiClientService {
     public readonly baseAddress: string;
-    private listDevicesUrl = () => `${this.baseAddress}/Device`;
-    private getDeviceUrl = (deviceId: string) => `${this.listDevicesUrl()}/${deviceId}`;
-    private getConnectionStateUrl = (deviceId: string) => `${this.baseAddress}/Device/${deviceId}/connection-state`;
-    private createDeviceUrl = () => `${this.baseAddress}/Device`;
 
     constructor(
         private readonly httpClient: HttpClient,
@@ -38,7 +51,7 @@ export class PgotchiClientService {
 
     public listDevices() {
         return this.httpClient
-            .get(this.listDevicesUrl())
+            .get(route(Routes.ListDevices))
             .pipe(
                 map(response => response as DeviceSummary[])
             );
@@ -46,7 +59,7 @@ export class PgotchiClientService {
 
     public getDevice(deviceId: string) {
         return this.httpClient
-            .get(this.getDeviceUrl(deviceId))
+            .get(route(Routes.GetDevice, deviceId))
             .pipe(
                 catchError((err, caught) => {
                     console.error(err, caught);
@@ -58,7 +71,7 @@ export class PgotchiClientService {
 
     public getConnectionState(deviceId: string) {
         return this.httpClient
-            .get(this.getConnectionStateUrl(deviceId))
+            .get(route(Routes.GetConnectionState, deviceId))
             .pipe(
                 catchError((err, caught) => {
                     console.error(err, caught);
@@ -70,7 +83,7 @@ export class PgotchiClientService {
 
     public createDevice(request: RegisterDeviceRequest) {
         return this.httpClient
-            .post(this.createDeviceUrl(), request)
+            .post(route(Routes.CreateDevice), request)
             .pipe(
                 catchError((err, caught) => {
                     console.error(err, caught);
@@ -80,7 +93,15 @@ export class PgotchiClientService {
             );
     }
 
-    public updateDeviceProperties(request: UpdateDevicePropertiesRequest) {
-        throw new Error('Method not implemented.');
+    public updateDeviceProperties(deviceId: string, request: UpdateDevicePropertiesRequest) {
+        return this.httpClient
+            .patch(route(Routes.UpdateDevice, deviceId), request)
+            .pipe(
+                catchError((err, caught) => {
+                    console.error(err, caught);
+                    return throwError(() => err)
+                }),
+                map(response => response as DeviceTwinSummary)
+            );
     }
 }

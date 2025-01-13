@@ -12,7 +12,6 @@ type StubRef = {
 };
 
 const stubRef: StubRef = Object.keys(Stubs).map(key => ({ [key]: `@${Stubs[key]}` })).reduce((prev, curr) => ({ ...prev, ...curr })) as StubRef;
-console.log(stubRef);
 
 context('Add new Device', () => {
     describe('Happy path', () => {
