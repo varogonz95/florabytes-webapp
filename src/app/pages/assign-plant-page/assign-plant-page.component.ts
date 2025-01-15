@@ -3,11 +3,11 @@ import { ActivatedRoute } from '@angular/router';
 import { DeviceSummary } from '../../models/device-summary';
 import { getDefaultPlantInfo, PlantInfo } from '../../models/plant-info';
 import { PgotchiClientService } from '../../services/pgotchi-client/pgotchi-client.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'app-assign-plant-page',
     templateUrl: './assign-plant-page.component.html',
-    styleUrl: './assign-plant-page.component.css'
 })
 export class AssignPlantPage implements OnInit {
     private device!: DeviceSummary;
@@ -26,10 +26,14 @@ export class AssignPlantPage implements OnInit {
         console.log('Device:', this.device);
     }
 
-    public onSubmit(): void {
-        this.pgotchiClient.updateDeviceProperties({
-            deviceId: this.device.id,
-            properties: { ...this.plantInfo },
-        });
+    public async onSubmit(): Promise<void> {
+        firstValueFrom(
+            this.pgotchiClient
+                .updateDeviceProperties(
+                    this.device.id,
+                    {
+                        eTag: this.device.eTag,
+                        properties: { ...this.plantInfo },
+                    }));
     }
 }

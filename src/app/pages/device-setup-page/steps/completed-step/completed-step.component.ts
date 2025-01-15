@@ -16,7 +16,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
         </div>
         <div class="control">
             @if (confirmRoute) {
-                <a class="button is-link" [routerLink]="confirmRoute">Yes, let's assign a plant!</a>
+                <a data-cy-id="assignPlantBtn" class="button is-link" [routerLink]="confirmRoute">Yes, let's assign a plant!</a>
             }
             @else {
                 <button type="button" class="button is-link" (click)="onConfirmHandler()">Yes, let's assign a plant!</button>

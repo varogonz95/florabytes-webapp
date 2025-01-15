@@ -1,11 +1,11 @@
 import fixture from "../fixtures/device-setup/fixture.json";
 import { CharacteristicMock, DeviceMock, GattMock, PrimaryServiceMock } from "web-bluetooth-mock";
-import { stringToBuffer } from "../support/utils";
 
 const Stubs = {
     getDevice: 'getDeviceReq',
     getConnectionState: 'getConnectionStateReq',
     createDevice: 'createDeviceReq',
+    updateDeviceProperties: 'updateDevicePropertiesReq',
 }
 type StubRef = {
     [k in keyof typeof Stubs]: `@${k}`;
@@ -27,7 +27,7 @@ context('Add new Device', () => {
             completeDeviceScanStep();
             completeNetworkStep(wifiCredentials);
             completeDeviceConnection();
-            // completeDeviceInfo(deviceInfo);
+            completePlantInfo(deviceInfo.properties.desired);
         });
     });
 });
@@ -36,7 +36,7 @@ function addInterceptors(deviceInfo: any) {
     cy.intercept(
         'GET', `http://localhost:5173/Device/*`,
         {
-            delay: 2000,
+            // delay: 2000,
             statusCode: 200,
             body: deviceInfo,
         })
@@ -46,6 +46,16 @@ function addInterceptors(deviceInfo: any) {
         'POST', `http://localhost:5173/Device`,
         { statusCode: 200, })
         .as(Stubs.createDevice);
+
+    cy.intercept(
+        'PUT', `http://localhost:5173/Device/*`,
+        {
+            statusCode: 200,
+            body: {
+                deviceInfo
+            },
+        })
+        .as(Stubs.updateDeviceProperties);
 }
 
 function visitPage(deviceInfo: any) {
@@ -64,7 +74,7 @@ function stubWebBLEApi(win: Cypress.AUTWindow, deviceInfo: any) {
     const gattServerMock = new GattMock(deviceMock);
     const gattServiceMock = new PrimaryServiceMock(deviceMock, 'user_data', true);
     const gattCharacteristicMock = new CharacteristicMock(gattServiceMock, 'user_control_point');
-    const staticValue = stringToBuffer(deviceInfo.deviceId);
+    const staticValue = Cypress.Buffer.from(deviceInfo.deviceId);
 
     cy.stub(win.navigator.bluetooth, 'requestDevice')
         .returns(Promise.resolve(deviceMock));
@@ -99,19 +109,32 @@ function completeNetworkStep(wifiCredentials: any) {
 
 function completeDeviceConnection() {
     cy.wait(stubRef.getDevice);
-    cy.get('[data-id=connectivity-btn]').click();
+    cy.get('[data-cy-id=connectivity-btn]').click();
 }
 
-function completeDeviceInfo(deviceInfo: any) {
-    cy.get('#device-info-form')
+function completePlantInfo(plantInfo: any) {
+    cy.get('[data-cy-id="assignPlantBtn"]').click();
+    cy.get('#plant-info-form')
         .within(_ => {
-            cy.get('input[name=deviceName]')
+            cy.get('input[name=plantName]')
                 .clear()
-                .type(deviceInfo.name);
-            cy.get('input[name=deviceDescription]')
+                .type(plantInfo.name);
+
+            cy.get('input[name=plantDescription]')
                 .clear()
-                .type(deviceInfo.description);
-            // cy.root().submit();
+                .type(plantInfo.description);
+
+            cy.get('input[name=sinceYear]')
+                .clear()
+                .type(plantInfo.sinceYear);
+
+            cy.get('select[name=sinceMonth]')
+                .select(plantInfo.sinceMonth);
+
+            cy.get('select[name=location]')
+                .select(plantInfo.location);
+
+            cy.root().submit();
         })
-        .wait(stubRef.createDevice);
+        .wait(stubRef.updateDeviceProperties);
 }

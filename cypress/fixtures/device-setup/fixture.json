@@ -1,7 +1,23 @@
 {
     "deviceInfo": {
+        "eTag": "AAAAAAAAAAE=",
         "deviceId": "test-device-1",
-        "connectionState": "connected"
+        "connectionState": "connected",
+        "properties": {
+            "desired": {
+                "name": "Echeveria 'Perle von Nurnberg'",
+                "description": "A beautiful succulent plant with purple and green leaves.",
+                "sinceMonth": 3,
+                "sinceYear": 2021,
+                "location": "indoors",
+                "species": "Echeveria",
+                "variety": "Perle von Nurnberg",
+                "wateringFrequency": 7,
+                "lighting": "indirect",
+                "temperature": 20,
+                "humidity": 50
+            }
+        }
     },
     "wifiCredentials": {
         "ssid": "my-wifi-network",
