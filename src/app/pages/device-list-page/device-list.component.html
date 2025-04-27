@@ -19,9 +19,9 @@
 
                 @for (twin of $devices | async; track $index) {
                     <div class="cell">
-                        <a [routerLink]="['/devices', twin.id, 'telemetry']">
+                        <a [routerLink]="['/devices', twin.deviceId, 'telemetry']">
                             <app-device-summary-card
-                                [deviceId]="twin.id"
+                                [deviceId]="twin.deviceId"
                                 [connectionState]="twin.connectionState"
                                 [lastActivityTime]="twin.lastActivityTime">
                             </app-device-summary-card>

@@ -1,5 +1,5 @@
 export interface DeviceSummary {
-    id: string
+    deviceId: string
     name?: string
     description?: string
     userId: string,

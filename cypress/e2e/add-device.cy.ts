@@ -28,15 +28,18 @@ context('Add new Device', () => {
             completeNetworkStep(wifiCredentials);
             completeDeviceConnection();
             completePlantInfo(deviceInfo.properties.desired);
+
+            cy.url().should('eq', 'http://localhost:4200/devices');
         });
     });
 });
 
 function addInterceptors(deviceInfo: any) {
+    cy.intercept('GET', `http://localhost:5173/Device`, { statusCode: 200});
+
     cy.intercept(
         'GET', `http://localhost:5173/Device/*`,
         {
-            // delay: 2000,
             statusCode: 200,
             body: deviceInfo,
         })
@@ -56,6 +59,7 @@ function addInterceptors(deviceInfo: any) {
             },
         })
         .as(Stubs.updateDeviceProperties);
+
 }
 
 function visitPage(deviceInfo: any) {
