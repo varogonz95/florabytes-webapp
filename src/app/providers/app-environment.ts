@@ -34,3 +34,7 @@ export interface IAppEnvironment {
         negotiateEndpoint: string,
     },
 }
+
+export interface E2eAppEnvironment extends IAppEnvironment {
+    stubRequests: boolean;
+}

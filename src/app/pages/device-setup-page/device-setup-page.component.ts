@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { getDefaultPlantInfo, PlantInfo } from '../../models/plant-info';
+import { BehaviorSubject } from 'rxjs';
+import { getDefaultPlantInfo } from '../../models/plant-info';
 import { IAppEnvironment } from '../../providers/app-environment';
 import { APP_ENVIRONMENT } from '../../providers/app-environment.provider';
 
@@ -45,17 +45,10 @@ export class DeviceSetupPage implements OnInit {
     public retryCount = 0;
 
     private characteristic: BluetoothRemoteGATTCharacteristic = null!;
-    private readonly deviceInfoChanges$ = new Subject<Partial<PlantInfo>>();
 
     constructor(
         @Inject(APP_ENVIRONMENT)
-        private readonly env: IAppEnvironment) {
-
-        this.deviceInfoChanges$
-            .subscribe(changes =>
-                Object.keys(changes)
-                    .forEach(key => this.plantInfo[key] = changes[key]));
-    }
+        private readonly env: IAppEnvironment) { }
 
     ngOnInit(): void {
         if (!this.env.bypassBluetoothAdapterCheck)
@@ -73,17 +66,18 @@ export class DeviceSetupPage implements OnInit {
             // Start scanning for FloraByte devices
             this.isPairing$.next(true);
             const bleDevice = await this.selectDevice();
-
-            // Once found and selected, then set values accordingly
-            this.deviceInfoChanges$.next({ name: bleDevice.name ?? bleDevice.id });
             this.isPairing$.next(false);
-
+            
+            // Connect to the selected device
             const gattService = await this.connectToGattService(bleDevice);
-            this.characteristic = await gattService.getCharacteristic(UserControlPointUuid);
-
-            const staticValue = await this.characteristic.readValue();
+            const characteristic = await gattService.getCharacteristic(UserControlPointUuid);
+            const staticValue = await characteristic.readValue();
             const deviceId = Buffer.from(staticValue.buffer).toString('utf8');
-            this.deviceInfoChanges$.next({ deviceId: deviceId });
+            console.log(deviceId);
+
+            this.plantInfo.deviceId = deviceId;
+            this.plantInfo.name = bleDevice.name ?? bleDevice.id;
+            this.characteristic = characteristic;
 
             this.stepsSequence$.next(SetupSteps.NetworkSetup);
         }
@@ -143,8 +137,6 @@ export class DeviceSetupPage implements OnInit {
         const wifiCredentials = JSON.stringify(this.wifiCredentials);
         const buffer = Buffer.from(wifiCredentials);
         await this.characteristic.writeValue(buffer);
-
-        // this.characteristic.service.device.gatt?.disconnect();
 
         this.stepsSequence$.next(SetupSteps.WaitingConnection);
     }

@@ -1,5 +1,10 @@
-import fixture from "../fixtures/device-setup/fixture.json";
+import { StaticResponse } from "cypress/types/net-stubbing";
 import { CharacteristicMock, DeviceMock, GattMock, PrimaryServiceMock } from "web-bluetooth-mock";
+import fixture from "../fixtures/device-setup/fixture.json";
+
+const { baseUrl } = Cypress.config();
+const { pgotchiHttpClient, stubRequests } = Cypress.env();
+const { baseAddress: pgotchiAddress } = pgotchiHttpClient;
 
 const Stubs = {
     getDevice: 'getDeviceReq',
@@ -11,18 +16,23 @@ type StubRef = {
     [k in keyof typeof Stubs]: `@${k}`;
 };
 
-const stubRef: StubRef = Object.keys(Stubs).map(key => ({ [key]: `@${Stubs[key]}` })).reduce((prev, curr) => ({ ...prev, ...curr })) as StubRef;
+const stubRef: StubRef =
+    Object.keys(Stubs)
+        .map(key => ({ [key]: `@${Stubs[key]}` }))
+        .reduce((prev, curr) => ({ ...prev, ...curr })) as StubRef;
 
 context('Add new Device', () => {
     describe('Happy path', () => {
         const { deviceInfo, wifiCredentials } = fixture;
 
-        before(() => {
-            visitPage(deviceInfo);
+        before(async () => {
+            if (!stubRequests) createDevice(deviceInfo);
         });
 
         it('should add a new device', () => {
             addInterceptors(deviceInfo);
+
+            visitPage(deviceInfo);
 
             completeDeviceScanStep();
             completeNetworkStep(wifiCredentials);
@@ -34,36 +44,61 @@ context('Add new Device', () => {
     });
 });
 
+function createDevice(deviceInfo) {
+    return cy.request({
+        method: 'POST',
+        url: `${pgotchiAddress}/Device`,
+        body: deviceInfo,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+}
+
 function addInterceptors(deviceInfo: any) {
-    cy.intercept('GET', `http://localhost:5173/Device`, { statusCode: 200});
+    cy.intercept('GET', `${pgotchiAddress}/Device`, { statusCode: 200 });
 
     cy.intercept(
-        'GET', `http://localhost:5173/Device/*`,
-        {
-            statusCode: 200,
-            body: deviceInfo,
-        })
+        'GET', `${pgotchiAddress}/Device/*`,
+        interceptHandler(stubRequests,
+            {
+                statusCode: 200,
+                body: { ...deviceInfo },
+            }))
         .as(Stubs.getDevice);
 
     cy.intercept(
-        'POST', `http://localhost:5173/Device`,
-        { statusCode: 200, })
+        'POST', `${pgotchiAddress}/Device`,
+        interceptHandler(stubRequests, { statusCode: 200, }))
         .as(Stubs.createDevice);
 
     cy.intercept(
-        'PUT', `http://localhost:5173/Device/*`,
-        {
-            statusCode: 200,
-            body: {
-                deviceInfo
-            },
-        })
+        'PUT', `${pgotchiAddress}/Device/*`,
+        interceptHandler(stubRequests,
+            {
+                statusCode: 200,
+                body: { ...deviceInfo },
+            }))
         .as(Stubs.updateDeviceProperties);
 
 }
 
+function interceptHandler(isStubbed: boolean, staticResponse: StaticResponse) {
+    return req => {
+        if (isStubbed) {
+            req.reply(staticResponse);
+        }
+        else {
+            req.continue(res => {
+                res.body = staticResponse.body ?? res.body;
+                res.send();
+            });
+        }
+    };
+}
+
 function visitPage(deviceInfo: any) {
-    cy.visit('http://localhost:4200/device-setup', {
+    cy.visit(`${baseUrl}/device-setup`, {
         onBeforeLoad(win) {
             stubWebBLEApi(win, deviceInfo);
         },
@@ -78,7 +113,8 @@ function stubWebBLEApi(win: Cypress.AUTWindow, deviceInfo: any) {
     const gattServerMock = new GattMock(deviceMock);
     const gattServiceMock = new PrimaryServiceMock(deviceMock, 'user_data', true);
     const gattCharacteristicMock = new CharacteristicMock(gattServiceMock, 'user_control_point');
-    const staticValue = Cypress.Buffer.from(deviceInfo.deviceId);
+    const staticValueBuffer = Cypress.Buffer.from(deviceInfo.deviceId);
+    const staticValueDataView = new DataView(staticValueBuffer.buffer);
 
     cy.stub(win.navigator.bluetooth, 'requestDevice')
         .returns(Promise.resolve(deviceMock));
@@ -93,7 +129,7 @@ function stubWebBLEApi(win: Cypress.AUTWindow, deviceInfo: any) {
         .returns(Promise.resolve(gattCharacteristicMock));
 
     cy.stub(gattCharacteristicMock, 'readValue')
-        .returns(Promise.resolve(staticValue));
+        .returns(Promise.resolve(staticValueDataView));
 }
 
 function completeDeviceScanStep() {
@@ -113,7 +149,6 @@ function completeNetworkStep(wifiCredentials: any) {
 
 function completeDeviceConnection() {
     cy.wait(stubRef.getDevice);
-    cy.get('[data-cy-id=connectivity-btn]').click();
 }
 
 function completePlantInfo(plantInfo: any) {

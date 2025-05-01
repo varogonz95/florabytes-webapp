@@ -30,7 +30,7 @@
                             @case (SetupSteps.WaitingConnection) {
                                 <app-device-connection-step
                                     [deviceId]="plantInfo.deviceId"
-                                    (onClickContinue)="stepsSequence$.next(SetupSteps.SetupCompleted)">
+                                    (onConnected)="stepsSequence$.next(SetupSteps.SetupCompleted)">
                                 </app-device-connection-step>
                             }
                             @case (SetupSteps.SetupCompleted) {
@@ -42,8 +42,7 @@
                                 <h3 class="title">Woops! :(</h3>
                                 <div class="content">
                                     <p>
-                                        Looks like your current device does not have a Bluetooth adapter.<br />
-                                        Please enable Bluetooth in your device settings.
+                                        Looks like Bluetooth is disconnected from your current device.
                                     </p>
                                 </div>
                             }
