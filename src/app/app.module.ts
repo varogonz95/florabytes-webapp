@@ -16,12 +16,12 @@ import { DeviceSummaryCardComponent } from './components/device-summary-card/dev
 import { SharedComponentsModule } from './components/shared-components.module';
 import { TelemetryChartStandaloneComponent } from './components/telemetry-chart/telemetry-chart-standalone.component';
 // Pages
-import { DeviceListPage } from './pages/device-list-page/device-list.component';
+import { DeviceListPage } from './pages/device-list/device-list.component';
 import { DeviceSetupPageModule } from './pages/device-setup-page/device-setup-page.module';
-import { DeviceTelemetryPage } from './pages/device-telemetry-page/device-telemetry-page.component';
-import { LoginPage } from './pages/login-page/login-page.component';
-import { AssignPlantPage } from './pages/assign-plant-page/assign-plant-page.component';
-import { PageNotFoundPage } from './pages/page-not-found-page/page-not-found-page.component';
+import { DeviceTelemetryPage } from './pages/device-telemetry/device-telemetry-page.component';
+import { LoginPage } from './pages/login/login-page.component';
+import { AssignPlantPage } from './pages/assign-plant/assign-plant-page.component';
+import { PageNotFoundPage } from './pages/not-found/page-not-found-page.component';
 
 const PagesModules = [
     DeviceSetupPageModule
@@ -51,8 +51,12 @@ const StandaloneComponents = [
         ...StandaloneComponents,
     ],
     providers: [
-        provideFirebaseApp(() => initializeApp(environment.firebase)),
-        provideAuth(() => getAuth()),
+        environment.firebase ?
+            [
+                provideFirebaseApp(() => initializeApp(environment.firebase!)),
+                provideAuth(() => getAuth())
+            ]
+            : [],
         provideCharts(withDefaultRegisterables()),
         provideHttpClient(),
     ],

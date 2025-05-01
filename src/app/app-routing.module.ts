@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AssignPlantPage } from './pages/assign-plant-page/assign-plant-page.component';
-import { DeviceListPage } from './pages/device-list-page/device-list.component';
+import { AssignPlantPage } from './pages/assign-plant/assign-plant-page.component';
+import { DeviceListPage } from './pages/device-list/device-list.component';
 import { DeviceSetupPage } from './pages/device-setup-page/device-setup-page.component';
-import { DeviceTelemetryPage } from './pages/device-telemetry-page/device-telemetry-page.component';
-import { PageNotFoundPage } from './pages/page-not-found-page/page-not-found-page.component';
+import { DeviceTelemetryPage } from './pages/device-telemetry/device-telemetry-page.component';
+import { PageNotFoundPage } from './pages/not-found/page-not-found-page.component';
 import { deviceResolver } from './resolvers/device.resolver';
 
 export const routeParams = {

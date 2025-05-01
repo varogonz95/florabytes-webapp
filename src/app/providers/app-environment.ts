@@ -2,7 +2,7 @@ export interface IAppEnvironment {
     maxPairingRetries?: number,
     bypassBluetoothAdapterCheck?: boolean,
     simulateMobileUserAgent?: boolean,
-    firebase: {
+    firebase?: {
         apiKey: string,
         authDomain: string,
         projectId: string,

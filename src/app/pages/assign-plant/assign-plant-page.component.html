@@ -11,39 +11,44 @@
                         <h3 class="title">Plant information.</h3>
                         <h5 class="subtitle">Tell us more about your plant.</h5>
                         <div class="content">
-                            <p><small>This information will be used to help you keep track of your plant's growth.</small></p>
+                            <p>
+                                <small>This information will be used to help us keep track of your plant's growth.</small>
+                            </p>
                         </div>
-            
-                        <!-- <div class="field is-flex is-justify-content-center">
-                            <figure class="image is-rounded is-128x128">
-                                <img class="is-rounded" [src]="plant.avatarImgUrl" alt="No avatar image" />
-                            </figure>
-                        </div>
-                    
-                        <div class="field has-text-centered">
-                            <div class="control">
-                                <input type="hidden" name="avatarImgUrl" [(ngModel)]="plant.avatarImgUrl" />
-                                <button type="button" class="button is-small" (click)="showImageSelector()">Change avatar</button>
-                            </div>
-                        </div> -->
             
                         <div class="field">
-                            <label for="" class="label">What's your plant's name?</label>
+                            <label for="" class="label">What's your plant's name? *</label>
                             <div class="control">
-                                <input name="plantName" type="text" class="input" [(ngModel)]="plantInfo.name" required />
+                                <input 
+                                    type="text" 
+                                    name="plantName"
+                                    placeholder="e.g. Echeveria 'Blue Rose'" 
+                                    class="input" 
+                                    [(ngModel)]="plantInfo.name" required 
+                                />
                             </div>
                         </div>
             
                         <div class="field">
-                            <label for="" class="label">Any fun facts about your plant?</label>
+                            <label for="" class="label">Any interesting facts about your plant?</label>
                             <div class="control">
-                                <input type="text" class="input" name="plantDescription" [(ngModel)]="plantInfo.description" />
+                                <input 
+                                    type="text" 
+                                    name="plantDescription" 
+                                    placeholder="e.g. This plant is a gift from my friend."
+                                    class="input" 
+                                    [(ngModel)]="plantInfo.description"
+                                />
                             </div>
                         </div>
             
                         <div class="field">
                             <label for="" class="label">When did you adopt this plant?</label>
-                            <div class="columns">
+                            <p class="is-muted">
+                                <small>If not sure, just pick today's date.</small>
+                            </p>
+                            <div class="columns is-multiline">
+                                <!-- Month field -->
                                 <div class="field column">
                                     <label for="sinceMonth">(Month)</label>
                                     <div class="control">
@@ -66,6 +71,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                <!-- Year field -->
                                 <div class="field column">
                                     <label for="sinceYear">(Year)</label>
                                     <div class="control">
@@ -76,7 +82,7 @@
                         </div>
             
                         <div class="field">
-                            <label for="" class="label">Where is your plant located?</label>
+                            <label for="" class="label">Where is your plant placed?</label>
                         </div>
                         <div class="columns">
                             <div class="field column">
@@ -85,7 +91,6 @@
                                         <option value="" selected disabled>-Select a location-</option>
                                         <option value="outdoors">Outdoors</option>
                                         <option value="indoors">Indoors</option>
-                                        <option value="other">Other</option>
                                     </select>
                                 </div>
                             </div>
