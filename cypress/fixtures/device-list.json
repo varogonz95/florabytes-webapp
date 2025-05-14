@@ -1,0 +1,68 @@
+[
+    {
+        "deviceId": "1234567890abcdef",
+        "name": "Test Device 1",
+        "description": "This is a test device.",
+        "userId": "user123",
+        "eTag": "etag123",
+        "deviceEtag": "deviceEtag123",
+        "status": "connected",
+        "connectionState": "Connected",
+        "lastActivityTime": "2023-10-01T12:00:00Z"
+    },
+    {
+        "deviceId": "abcdef1234567890",
+        "name": "Test Device 2",
+        "description": "This is another test device.",
+        "userId": "user456",
+        "eTag": "etag456",
+        "deviceEtag": "deviceEtag456",
+        "status": "disconnected",
+        "connectionState": "Disconnected",
+        "lastActivityTime": "2023-10-02T14:30:00Z"
+    },
+    {
+        "deviceId": "7890abcdef123456",
+        "name": "Test Device 3",
+        "description": "Yet another test device.",
+        "userId": "user789",
+        "eTag": "etag789",
+        "deviceEtag": "deviceEtag789",
+        "status": "connected",
+        "connectionState": "Connected",
+        "lastActivityTime": "2023-10-03T09:15:00Z"
+    },
+    {
+        "deviceId": "4567890abcdef123",
+        "name": "Test Device 4",
+        "description": "Fourth test device.",
+        "userId": "user101",
+        "eTag": "etag101",
+        "deviceEtag": "deviceEtag101",
+        "status": "disconnected",
+        "connectionState": "Disconnected",
+        "lastActivityTime": "2023-10-04T16:45:00Z"
+    },
+    {
+        "deviceId": "123abcdef4567890",
+        "name": "Test Device 5",
+        "description": "Fifth test device.",
+        "userId": "user202",
+        "eTag": "etag202",
+        "deviceEtag": "deviceEtag202",
+        "status": "connected",
+        "connectionState": "Connected",
+        "lastActivityTime": "2023-10-05T11:20:00Z"
+    },
+    {
+        "deviceId": "abcdef7890123456",
+        "name": "Test Device 6",
+        "description": "Sixth test device.",
+        "userId": "user303",
+        "eTag": "etag303",
+        "deviceEtag": "deviceEtag303",
+        "status": "disconnected",
+        "connectionState": "Disconnected",
+        "lastActivityTime": "2023-10-06T08:10:00Z"
+    }
+]

@@ -1,6 +1,6 @@
-import { StaticResponse } from "cypress/types/net-stubbing";
 import { CharacteristicMock, DeviceMock, GattMock, PrimaryServiceMock } from "web-bluetooth-mock";
-import fixture from "../fixtures/device-setup/fixture.json";
+import fixture from "../fixtures/device-setup.json";
+import { interceptHandler } from "../support/helpers";
 
 const { baseUrl } = Cypress.config();
 const { pgotchiHttpClient, stubRequests } = Cypress.env();
@@ -81,20 +81,6 @@ function addInterceptors(deviceInfo: any) {
             }))
         .as(Stubs.updateDeviceProperties);
 
-}
-
-function interceptHandler(isStubbed: boolean, staticResponse: StaticResponse) {
-    return req => {
-        if (isStubbed) {
-            req.reply(staticResponse);
-        }
-        else {
-            req.continue(res => {
-                res.body = staticResponse.body ?? res.body;
-                res.send();
-            });
-        }
-    };
 }
 
 function visitPage(deviceInfo: any) {
